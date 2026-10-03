@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Résultats — UWB Learn</title><link href="../assets/css/style.css" rel="stylesheet">
+<meta name="description" content="Module Résultats UWB : notes, corrections IA et historique.">
+<link href="../forms/uwbfin.webp" rel="icon">
+<link href="https://fonts.googleapis.com" rel="preconnect"><link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+<link href="../assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<link href="../assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+<link href="../assets/vendor/aos/aos.css" rel="stylesheet">
+<link href="../assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
+<link href="../assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+</head>
+<body class="index-page">
+<header id="header" class="header d-flex align-items-center sticky-top">
+<div class="container position-relative d-flex align-items-center justify-content-between">
+<a href="../index.html" class="logo d-flex align-items-center me-auto me-xl-0"><img src="../forms/uwbfin.webp" alt="UWB"></a>
+<nav id="navmenu" class="navmenu"><ul>
+<li><a href="#" id="nav-home"><i class="bi bi-speedometer2"></i> Mon espace</a></li>
+<li><a href="cours.html"><i class="bi bi-mortarboard"></i> Cours & Meet</a></li>
+<li><a href="bibliotheque.html"><i class="bi bi-book"></i> Bibliothèque</a></li>
+<li><a href="evaluations.html"><i class="bi bi-patch-check"></i> Évaluations</a></li>
+<li><a href="resultats.html" class="active"><i class="bi bi-bar-chart"></i> Résultats</a></li>
+</ul><i class="mobile-nav-toggle d-xl-none bi bi-list"></i></nav>
+<a class="btn-getstarted" href="#" onclick="uwbLogout();return false;">Déconnexion</a>
+</div></header>
+<main class="main">
+<section class="section pt-4"><div class="container" data-aos="fade-up">
+<div class="role-hero role-admin" data-aos="fade-up" data-aos-delay="100">
+<div class="d-flex align-items-center gap-3 flex-wrap">
+<span class="role-avatar"><i class="bi bi-trophy-fill"></i></span>
+<div><span class="hero-pill"><i class="bi bi-clock-history"></i> Module 5 — Résultats</span>
+<h2>Notes, corrections & historique</h2>
+<p class="mb-0">Chaque copie : proposition IA, note finale du professeur, commentaire et archive.</p></div>
+</div></div>
+<div class="stats-grid cols-3 mt-4" id="kpi" data-aos="fade-up" data-aos-delay="150"></div>
+</div></section>
+<section class="testimonials section light-background pt-4"><div class="container section-title" data-aos="fade-up"><p id="copyCount"></p></div>
+<div class="container" data-aos="fade-up"><div class="search-pro mb-4">
+<div class="pro-row">
+<div class="pro-input"><i class="bi bi-search"></i><input id="f-q" placeholder="Nom ou titre…" aria-label="Rechercher" oninput="uwbSearchType(this);renderCopies()"><button type="button" class="pro-clear" title="Effacer" onclick="uwbSearchClear('f-q',renderCopies)"><i class="bi bi-x-lg"></i></button></div>
+<div class="select-uwb pro-select"><i class="bi bi-flag"></i><select id="f-statut" onchange="renderCopies()" aria-label="Statut"><option value="">Tous statuts</option><option value="validée">Note finale validée</option><option value="attente">En attente IA</option></select></div>
+<div class="select-uwb pro-select"><i class="bi bi-file-earmark-text"></i><select id="f-eval" onchange="renderCopies()" aria-label="Sujet"></select></div>
+<div class="select-uwb pro-select"><i class="bi bi-sort-down"></i><select id="f-tri" onchange="renderCopies()" aria-label="Tri"><option value="recentes">Plus récentes</option><option value="anciennes">Plus anciennes</option><option value="notes">Meilleures notes</option><option value="notes-asc">Notes croissantes</option></select></div>
+</div>
+</div>
+<div id="list"></div></div></section>
+</main>
+<footer id="footer" class="footer light-background"><div class="container footer-bottom"><div class="copyright"><p>© UWB E-learning — Résultats. Design : <a href="https://bootstrapmade.com/">BootstrapMade (Orbit)</a>.</p></div></div></footer>
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a><div id="preloader"></div>
+<script src="../assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/vendor/aos/aos.js"></script><script src="../assets/vendor/glightbox/js/glightbox.min.js"></script>
+<script src="../assets/vendor/isotope-layout/isotope.pkgd.min.js"></script><script src="../assets/vendor/imagesloaded/imagesloaded.pkgd.min.js"></script>
+<script src="../assets/vendor/purecounter/purecounter_vanilla.js"></script><script src="../assets/vendor/swiper/swiper-bundle.min.js"></script>
+<script src="../assets/js/script.js"></script><script>const s=uwbRequire();if(s&&(s.role==='professeur'||s.role==='admin')){location.href=uwbHomeByRole(s.role);}
+document.getElementById('nav-home').href=uwbHomeByRole(s.role);
+(function(el,v){if(el)el.innerHTML=v;})(document.getElementById('top-user'),'<i class="bi bi-person-circle"></i> '+s.nom);
+const db=uwbLoad();const all=s.role==='etudiant'? db.soumissions.filter(x=>x.email===s.email):db.soumissions;
+const vals=all.filter(x=>x.statut==='validée');const moy=vals.length?(vals.reduce((a,b)=>a+(b.noteFinale??b.noteIA),0)/vals.length).toFixed(1):'—';
+const kpis=[['bi-journal-check',all.length,'Évaluations passées','stat-card-primary'],['bi-speedometer',moy+'/20','Moyenne validée',''],['bi-award-fill',vals.length,'Résultats finaux','stat-card-accent']];
+document.getElementById('kpi').innerHTML=kpis.map(([ic,v,t,c],i)=>`<div class="stat-card ${c}" data-aos="zoom-in" data-aos-delay="${300+i*50}"><div class="stat-icon-wrap"><i class="bi ${ic}"></i></div><div class="stat-info"><span class="stat-value">${v}</span><span class="stat-title">${t}</span></div></div>`).join('');
+document.getElementById('f-eval').innerHTML='<option value="">Tous les sujets</option>'+db.evaluations.map(e=>`<option value="${e.id}">${e.titre}</option>`).join('');
+function noteOf(x){return x.noteFinale??x.noteIA;}
+function initials(n){return (n||'?').trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();}
+function ringColor(n){return n>=12?'#059669':n>=10?'#b45309':'#dc2626';}
+function renderCopies(){let arr=all.slice();
+const q=(document.getElementById('f-q').value||'').toLowerCase(),st=document.getElementById('f-statut').value,fev=document.getElementById('f-eval').value,tri=document.getElementById('f-tri').value;
+arr=arr.filter(x=>{const e2=db.evaluations.find(e=>e.id===x.evalId);const hay=(x.etudiant+' '+(e2?e2.titre:'')).toLowerCase();
+if(st==='validée'&&x.statut!=='validée')return false;
+if(st==='attente'&&x.statut==='validée')return false;
+if(fev&&x.evalId!==fev)return false;
+if(q&&!hay.includes(q))return false;return true;});
+arr.sort((a,b)=>tri==='anciennes'?(a.date<b.date?-1:1):tri==='notes'?noteOf(b)-noteOf(a):tri==='notes-asc'?noteOf(a)-noteOf(b):(a.date<b.date?1:-1));
+document.getElementById('copyCount').textContent=arr.length+' copie(s) affichée(s)';
+document.getElementById('list').innerHTML=arr.map((x,i)=>{const ev=db.evaluations.find(e=>e.id===x.evalId);const n=noteOf(x);const ok=x.statut==='validée';
+return `<div class="copy-card mb-2 ${ok?'is-valid':'is-pending'}" data-aos="fade-up" data-aos-delay="${(i%4)*60}">
+<div class="d-flex gap-2 align-items-center flex-wrap"><span class="avatar-initials">${initials(x.etudiant)}</span>
+<div><strong><i class="bi bi-file-earmark-check"></i> ${ev?ev.titre:'Évaluation'}</strong><br><small class="text-muted"><i class="bi bi-person"></i> ${x.etudiant} • <i class="bi bi-calendar"></i> ${x.date}</small></div>
+<span class="ms-auto d-flex align-items-center gap-2">${ok?`<span class="badge-uwb"><i class="bi bi-trophy-fill"></i> Finale</span>`:`<span class="badge-ia"><i class="bi bi-hourglass-split"></i> En attente prof</span>`}<span class="note-ring" style="--p:${n*5};--c:${ok?ringColor(n):'#7c3aed'}" title="${n}/20"><span>${n}/20</span></span></span></div>
+<details class="copy-details mt-2"><summary>Voir la correction ${ok?'validée':'proposée par l\'IA'}</summary>${iaRapportHTML(x, ev)}</details>
+${x.commentProf?`<div class="alert alert-success py-2 mb-0 mt-2"><i class="bi bi-chat-quote-fill"></i> <strong>Prof :</strong> ${x.commentProf}</div>`:''}</div>`;}).join('')||'<p class="text-muted text-center"><i class="bi bi-emoji-neutral"></i> Aucune copie ne correspond aux filtres.</p>';}
+renderCopies();</script></body></html>

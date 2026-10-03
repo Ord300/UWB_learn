@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>File de validation IA — UWB Learn</title><link href="../assets/css/style.css" rel="stylesheet">
+<meta name="description" content="Espace professeur : vérifier et valider les corrections proposées par l'IA.">
+<link href="../forms/uwbfin.webp" rel="icon">
+<link href="https://fonts.googleapis.com" rel="preconnect"><link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+<link href="../assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<link href="../assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+<link href="../assets/vendor/aos/aos.css" rel="stylesheet">
+<link href="../assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
+<link href="../assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+</head>
+<body class="index-page">
+<header id="header" class="header d-flex align-items-center sticky-top">
+<div class="container position-relative d-flex align-items-center justify-content-between">
+<a href="../index.html" class="logo d-flex align-items-center me-auto me-xl-0"><img src="../forms/uwbfin.webp" alt="UWB"></a>
+<nav id="navmenu" class="navmenu"><ul>
+<li><a href="dashboard.html"><i class="bi bi-speedometer2"></i> Mon espace</a></li>
+<li><a href="mes-cours.html"><i class="bi bi-mortarboard"></i> Mes cours & Meet</a></li>
+<li><a href="creer-evaluation.html"><i class="bi bi-journal-plus"></i> Créer une évaluation</a></li>
+<li><a href="validation-ia.html" class="active"><i class="bi bi-robot"></i> Validation IA</a></li>
+</ul><i class="mobile-nav-toggle d-xl-none bi bi-list"></i></nav>
+<a class="btn-getstarted" href="#" onclick="uwbLogout();return false;">Déconnexion</a>
+</div></header>
+<main class="main">
+<section class="section pt-4"><div class="container" data-aos="fade-up">
+<div class="role-hero role-professeur" data-aos="fade-up" data-aos-delay="100">
+<div class="d-flex align-items-center gap-3 flex-wrap">
+<span class="role-avatar"><i class="bi bi-person-check-fill"></i></span>
+<div><span class="hero-pill"><i class="bi bi-robot"></i> Validation finale : vous décidez</span>
+<h2>File de validation IA</h2>
+<p class="mb-0">L'IA propose la note et le feedback — vérifiez, ajustez, commentez.</p></div>
+</div></div>
+<div class="stats-grid cols-3 mt-4" id="kpi" data-aos="fade-up" data-aos-delay="150"></div>
+</div></section>
+<section class="portfolio section light-background">
+<div class="container"><div class="search-pro mb-4" data-aos="fade-up">
+<div class="pro-row">
+<div class="pro-input"><i class="bi bi-search"></i><input id="f-nom" placeholder="Nom de l'étudiant… Ex : Grace…" aria-label="Nom étudiant" oninput="uwbSearchType(this);renderFiles()"><button type="button" class="pro-clear" title="Effacer" onclick="uwbSearchClear('f-nom',renderFiles)"><i class="bi bi-x-lg"></i></button></div>
+<div class="select-uwb pro-select"><i class="bi bi-file-earmark-text"></i><select id="f-eval" onchange="renderFiles()" aria-label="Titre évaluation"></select></div>
+<div class="pro-input" style="flex:1 1 200px"><i class="bi bi-calendar"></i><input id="f-date" type="date" aria-label="Date" onchange="uwbSearchType(this);renderFiles()"><button type="button" class="pro-clear" title="Effacer la date" onclick="document.getElementById('f-date').value='';uwbSearchType(document.getElementById('f-date'));renderFiles()"><i class="bi bi-x-lg"></i></button></div>
+</div>
+<div class="pro-row pro-tags"><span id="filter-count"></span><button type="button" class="pro-tag" onclick="resetFilters()">Tout afficher</button></div>
+</div>
+<div class="panel-pro" data-aos="fade-up"><div class="panel-head"><strong><i class="bi bi-hourglass-split"></i> Copies en attente</strong><small id="att-count"></small></div><div id="fileIA"></div></div></div></section>
+<section class="portfolio section light-background"><div class="container"><div class="panel-pro" data-aos="fade-up"><div class="panel-head"><strong><i class="bi bi-check2-all"></i> Copies validées</strong><small id="done-count"></small></div><div id="doneIA"></div></div></div></section>
+</main>
+<footer id="footer" class="footer light-background"><div class="container footer-bottom"><div class="copyright"><p>© UWB E-learning — Validation IA. Design : <a href="https://bootstrapmade.com/">BootstrapMade (Orbit)</a>.</p></div></div></footer>
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a><div id="preloader"></div>
+<script src="../assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/vendor/aos/aos.js"></script><script src="../assets/vendor/glightbox/js/glightbox.min.js"></script>
+<script src="../assets/vendor/isotope-layout/isotope.pkgd.min.js"></script><script src="../assets/vendor/imagesloaded/imagesloaded.pkgd.min.js"></script>
+<script src="../assets/vendor/purecounter/purecounter_vanilla.js"></script><script src="../assets/vendor/swiper/swiper-bundle.min.js"></script>
+<script src="../assets/js/script.js"></script><script>
+const s=uwbRequire(['professeur']); const db=uwbLoad();
+(function(el,v){if(el)el.innerHTML=v;})(document.getElementById('top-user'),'<i class="bi bi-person-circle"></i> '+s.nom);
+function mine(x){if(s.role==='admin')return true;const ev=db.evaluations.find(e=>e.id===x.evalId);return ev&&ev.prof===s.nom;}
+const attAll=db.soumissions.filter(x=>x.statut==='proposée-IA'&&mine(x));
+const doneAll=db.soumissions.filter(x=>x.statut==='validée'&&mine(x));
+const kpis=[['bi-hourglass-split',attAll.length,'En attente','stat-card-accent'],['bi-check2-all',doneAll.length,'Validées','stat-card-primary'],['bi-robot',db.soumissions.filter(x=>x.statut==='proposée-IA').length,'File totale','']];
+document.getElementById('kpi').innerHTML=kpis.map(([ic,v,t,c],i)=>`<div class="stat-card ${c}" data-aos="zoom-in" data-aos-delay="${300+i*50}"><div class="stat-icon-wrap"><i class="bi ${ic}"></i></div><div class="stat-info"><span class="stat-value">${v}</span><span class="stat-title">${t}</span></div></div>`).join('');
+const myEvals=(s.role==='admin'?db.evaluations:db.evaluations.filter(e=>e.prof===s.nom));
+document.getElementById('f-eval').innerHTML='<option value="">Tous les sujets</option>'+myEvals.map(e=>`<option value="${e.id}">${e.titre}</option>`).join('');
+function matchFilters(x){const qNom=(document.getElementById('f-nom').value||'').toLowerCase().trim();const qEval=document.getElementById('f-eval').value;const qDate=document.getElementById('f-date').value;const ev=db.evaluations.find(e=>e.id===x.evalId);
+if(qNom&&!(x.etudiant||'').toLowerCase().includes(qNom))return false;
+if(qEval&&x.evalId!==qEval)return false;
+if(qDate&&!(x.date||'').startsWith(qDate))return false;
+return true;}
+function resetFilters(){const n=document.getElementById('f-nom');const d=document.getElementById('f-date');n.value='';d.value='';document.getElementById('f-eval').value='';uwbSearchType(n);uwbSearchType(d);renderFiles();}
+function renderFiles(){const att=attAll.filter(matchFilters);const done=doneAll.filter(matchFilters);
+document.getElementById('filter-count').textContent=(att.length+done.length)+' rapport(s) trouvé(s)';
+document.getElementById('att-count').textContent=att.length+' copie(s)';
+document.getElementById('fileIA').innerHTML=att.map(x=>{const ev=db.evaluations.find(e=>e.id===x.evalId);
+return `<div class="mini-row" style="flex-wrap:wrap;align-items:flex-start"><div style="min-width:0;flex:1"><strong>${x.etudiant}</strong> <span class="text-muted">— ${ev?ev.titre:''}</span><br><small>${x.date} • Proposition IA : ${x.noteIA}/20</small></div>
+<div class="mini-actions"><span class="mini-badge">IA ${x.noteIA}/20</span></div>
+<div class="w-100"><details class="copy-details mt-1"><summary>Voir le rapport IA</summary>${iaRapportHTML(x,ev)}
+<form onsubmit="return valider(event,'${x.id}')" class="row g-3 form-min mt-2"><div class="col-md-2"><label class="form-label">Note /20</label><input id="n-${x.id}" type="number" min="0" max="20" value="${x.noteIA}" class="form-control"></div>
+<div class="col-md-7"><label class="form-label">Commentaire</label><input id="c-${x.id}" class="form-control" value="Validé après contrôle." placeholder="Message pour l'étudiant"></div>
+<div class="col-md-3 d-flex align-items-end"><button class="btn-uwb w-100"><i class="bi bi-check2-circle"></i> Valider</button></div></form></details></div></div>`;}).join('')||'<p class="text-muted small mb-0">File vide. Demandez aux étudiants de passer une évaluation.</p>';
+document.getElementById('done-count').textContent=done.length+' copie(s)';
+document.getElementById('doneIA').innerHTML=done.slice().reverse().map(x=>{const ev=db.evaluations.find(e=>e.id===x.evalId);
+return `<div class="mini-row" style="flex-wrap:wrap"><div style="min-width:0;flex:1"><strong>${x.etudiant}</strong><br><small>${ev?ev.titre:''} • ${x.date} • Finale : ${x.noteFinale}/20 (IA : ${x.noteIA})</small><br><small class="text-truncate d-block">${x.commentProf||'—'}</small></div><div class="mini-actions"><button class="icon-btn ok" title="Voir le rapport" onclick="document.getElementById('r-${x.id}').open=!document.getElementById('r-${x.id}').open"><i class="bi bi-eye"></i></button><button class="icon-btn danger" title="Supprimer" onclick="delCopy('${x.id}')"><i class="bi bi-trash"></i></button></div><div class="w-100"><details class="copy-details" id="r-${x.id}"><summary>Voir le rapport validé</summary>${iaRapportHTML(x,ev)}</details></div></div>`;}).join('')||'<p class="text-muted small mb-0">Aucune copie validée pour le moment.</p>';}
+function delCopy(id){if(!confirm('Supprimer cette copie validée ?'))return;const d=uwbLoad();d.soumissions=d.soumissions.filter(v=>v.id!==id);uwbSave(d);location.reload();}
+function valider(e,id){e.preventDefault();const d=uwbLoad();const x=d.soumissions.find(v=>v.id===id);
+x.noteFinale=parseInt(document.getElementById('n-'+id).value);x.commentProf=document.getElementById('c-'+id).value;x.statut='validée';uwbSave(d);location.reload();return false;}
+renderFiles();
+</script></body></html>

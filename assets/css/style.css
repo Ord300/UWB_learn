@@ -193,7 +193,7 @@ h6 {
   background: color-mix(in srgb, var(--accent-color), transparent 15%);
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 991.98px) {
   .header .logo {
     order: 1;
   }
@@ -213,7 +213,7 @@ h6 {
 # Navigation Menu
 --------------------------------------------------------------*/
 /* Navmenu - Desktop */
-@media (min-width: 1200px) {
+@media (min-width: 992px) {
   .navmenu {
     padding: 0;
   }
@@ -320,7 +320,7 @@ h6 {
 }
 
 /* Navmenu - Mobile */
-@media (max-width: 1199px) {
+@media (max-width: 991.98px) {
   .mobile-nav-toggle {
     color: var(--nav-color);
     font-size: 28px;
@@ -6799,7 +6799,9 @@ a.parc-row:hover .parc-go{color:#0a2a6b}
 .mod-link{display:inline-flex;align-items:center;gap:.4rem;font-weight:700;font-size:.88rem;color:#0a2a6b;text-decoration:none}
 .mod-link:hover{color:#7c3aed}
 /* ===== UWB — Liens du header (desktop) : pastilles avec icônes ===== */
-@media (min-width: 1200px) {
+@media (min-width: 992px) {
+  /* Nav centrée (logo à gauche, bouton à droite) */
+  .header #navmenu{position:absolute;left:50%;transform:translateX(-50%);}
   .header #navmenu ul{gap:6px}
   .header #navmenu a,.header #navmenu a:focus{gap:9px;padding:8px 15px 8px 9px;font-size:14.5px;font-weight:600;color:#334155;border-radius:999px;border:1px solid transparent;justify-content:flex-start;white-space:nowrap;text-decoration:none;transition:background .25s,color .25s,border-color .25s,transform .25s,box-shadow .25s}
   .header #navmenu a i,.header #navmenu a:focus i{font-size:15px;line-height:0;margin:0;width:30px;height:30px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;background:#e8edf9;color:#0a2a6b;transition:background .25s,color .25s}
@@ -6810,7 +6812,7 @@ a.parc-row:hover .parc-go{color:#0a2a6b}
   .header #navmenu a:hover,.header #navmenu a.active,.header #navmenu li:hover>a{text-decoration:none}
 }
 /* ===== UWB — Lien actif dans le menu mobile ===== */
-@media (max-width: 1199px) {
+@media (max-width: 991.98px) {
   .navmenu a.active{color:#0a2a6b !important;background:#eef2ff;border-radius:10px}
   .navmenu a.active i{background:#0a2a6b !important;color:#f2a900 !important}
 }

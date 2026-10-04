@@ -1,0 +1,14 @@
+# DirectoryIndex — la version PHP/MySQL est l'entrée principale (design inchangé)
+DirectoryIndex index.php index.html
+
+# Redirige les anciennes pages .html vers les nouvelles .php (même design)
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteRule ^index\.html$ index.php [R=301,L]
+RewriteRule ^login\.html$ login.php [R=301,L]
+RewriteRule ^inscription\.html$ inscription.php [R=301,L]
+RewriteRule ^dashboard\.html$ dashboard.php [R=301,L]
+RewriteRule ^etudiant/(.*)\.html$ etudiant/$1.php [R=301,L]
+RewriteRule ^prof/(.*)\.html$ prof/$1.php [R=301,L]
+RewriteRule ^admin/(.*)\.html$ admin/$1.php [R=301,L]
+</IfModule>

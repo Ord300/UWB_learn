@@ -287,7 +287,7 @@ function uwbLogin(email,pass){
   localStorage.setItem(UWB_SESSION, JSON.stringify({id:u.id,nom:u.nom,email:u.email,role:u.role,filiere:u.filiere}));
   return {user:u};
 }
-function uwbLogout(){ localStorage.removeItem(UWB_SESSION); location.href=uwbBase()+'login.html'; }
+function uwbLogout(){ localStorage.removeItem(UWB_SESSION); location.href=uwbBase()+'login.php'; }
 function uwbRegister(nom,email,pass,role,filiere){
   const db=uwbLoad();
   if(db.users.some(x=>x.email.toLowerCase()===email.toLowerCase())) return {error:"Cet email est déjà utilisé. Connectez-vous."};
@@ -304,7 +304,7 @@ function uwbHomeByRole(role){
 }
 function uwbRequire(roles){
   const s=uwbSession();
-  if(!s){ location.href=uwbBase()+'login.html'; return null; }
+  if(!s){ location.href=uwbBase()+'login.php'; return null; }
   if(roles && !roles.includes(s.role)){ location.href=uwbHomeByRole(s.role); return null; }
   return s;
 }

@@ -7,15 +7,24 @@ $q = trim($_GET['q'] ?? ''); $cat = trim($_GET['cat'] ?? '');
 $sql = 'SELECT * FROM livres WHERE 1=1'; $p = [];
 if ($cat !== '') { $sql .= ' AND categorie=?'; $p[] = $cat; }
 if ($q !== '') { $sql .= ' AND (titre LIKE ? OR auteur LIKE ? OR resume LIKE ? OR mots LIKE ?)'; $p += []; $p[] = "%$q%"; $p[] = "%$q%"; $p[] = "%$q%"; $p[] = "%$q%"; }
+// Étudiant : seulement les ressources de sa faculté (« — » = toutes facultés)
+$scope = '';
+if ($u['role'] === 'etudiant') {
+    $myFac = trim((string)($u['faculte'] ?? $u['filiere'] ?? ''));
+    if ($myFac !== '' && $myFac !== '—') {
+        $sql .= " AND (faculte=? OR faculte='—' OR faculte='')"; $p[] = $myFac; $scope = $myFac;
+    }
+}
 $sql .= ' ORDER BY telechargements DESC';
 $st = db()->prepare($sql); $st->execute($p); $list = $st->fetchAll();
-$all = db()->query('SELECT * FROM livres')->fetchAll();
-$sug = ia_suggestions($all, $q, '', [$cat ?: 'Informatique']);
+$sug = ia_suggestions($list, $q, '', [$cat ?: 'Informatique']);
 $isAdmin = $u['role'] === 'admin';
 $edit = null;
 if ($isAdmin && isset($_GET['edit'])) {
     $s = db()->prepare('SELECT * FROM livres WHERE id=?'); $s->execute([(int)$_GET['edit']]); $edit = $s->fetch();
 }
+$facultes = [];
+try { $facultes = db()->query('SELECT nom,code FROM facultes ORDER BY nom')->fetchAll(); } catch (Throwable $t) {}
 uwb_head('Bibliothèque intelligente', 'Ressources UWB.');
 uwb_header_nav('biblio', $isAdmin ? nav_admin() : nav_etudiant());
 ?>
@@ -43,12 +52,13 @@ uwb_header_nav('biblio', $isAdmin ? nav_admin() : nav_etudiant());
 </form>
 <div class="ia-box p-3 mb-4" data-aos="fade-up"><strong><i class="bi bi-robot"></i> Suggestions pertinentes :</strong>
 <?php foreach ($sug as $x): ?><span class="badge-ia me-1"><i class="bi bi-bookmark-star"></i> <?= e($x['titre']) ?></span><?php endforeach; ?></div>
+<?php if ($scope): ?><div class="text-center text-muted mb-3"><i class="bi bi-funnel"></i> <strong><?= count($list) ?></strong> ressource(s) — <span class="mini-badge"><i class="bi bi-building"></i> Faculté : <?= e($scope) ?></span></div><?php endif; ?>
 <?php if ($isAdmin): ?>
 <div class="d-flex justify-content-end mb-3" data-aos="fade-up"><button class="btn-uwb" data-bs-toggle="modal" data-bs-target="#addModal"><i class="bi bi-plus-circle"></i> <?= $edit ? 'Modifier la ressource' : 'Ajouter une ressource' ?></button></div>
 <div class="panel-pro" data-aos="fade-up"><div class="panel-head"><strong><i class="bi bi-collection"></i> Ressources publiées</strong><small><?= count($list) ?> ressource(s)</small></div>
 <?php foreach ($list as $l): ?>
 <div class="mini-row"><img src="<?= e(livre_cover($l)) ?>" alt="" loading="lazy" style="width:48px;height:64px;object-fit:cover;border-radius:8px;border:1px solid #e5e9f2;flex-shrink:0">
-<div style="min-width:0;flex:1"><strong><?= e($l['titre']) ?></strong><br><small><?= e($l['auteur']) ?> • <?= e($l['categorie']) ?> • <?= (int)$l['annee'] ?> • <i class="bi bi-download"></i> <?= (int)$l['telechargements'] ?></small></div>
+<div style="min-width:0;flex:1"><strong><?= e($l['titre']) ?></strong><br><small><?= e($l['auteur']) ?> • <?= e($l['categorie']) ?> • <?= e($l['faculte'] ?? '—') ?> • <?= (int)$l['annee'] ?> • <i class="bi bi-download"></i> <?= (int)$l['telechargements'] ?></small></div>
 <div class="mini-actions"><a class="icon-btn ok" href="../actions/livre.php?action=download&id=<?= (int)$l['id'] ?>"><i class="bi bi-download"></i></a>
 <a class="icon-btn" href="?edit=<?= (int)$l['id'] ?>&q=<?= urlencode($q) ?>&cat=<?= urlencode($cat) ?>"><i class="bi bi-pencil"></i></a>
 <a class="icon-btn danger" href="../actions/livre.php?action=delete&id=<?= (int)$l['id'] ?>" onclick="return confirm('Supprimer ?')"><i class="bi bi-trash"></i></a></div></div>
@@ -64,7 +74,7 @@ uwb_header_nav('biblio', $isAdmin ? nav_admin() : nav_etudiant());
 <div class="res-tags"><?php foreach (array_slice(array_filter(array_map('trim', explode(',', $l['mots'] ?? ''))), 0, 4) as $m): ?><span class="support-chip"><?= e($m) ?></span><?php endforeach; ?></div>
 <div class="res-foot"><a class="btn-simple primary" style="flex:1;justify-content:center" href="lecture.php?id=<?= (int)$l['id'] ?>"><i class="bi bi-book-open"></i> Consulter</a> <a class="btn btn-outline-primary" href="../actions/livre.php?action=download&id=<?= (int)$l['id'] ?>"><i class="bi bi-download"></i> Télécharger</a></div></div></div></div>
 <?php endforeach; ?>
-<?php if (!count($list)): ?><div class="col-12"><p class="text-muted text-center">Aucune ressource. Essayez « sql », « ohada », « ia ».</p></div><?php endif; ?>
+<?php if (!count($list)): ?><div class="col-12"><p class="text-muted text-center"><?= $scope ? 'Aucune ressource pour votre faculté pour le moment.' : 'Aucune ressource. Essayez « sql », « ohada », « ia ».' ?></p></div><?php endif; ?>
 </div>
 <?php endif; ?>
 <?php if ($isAdmin): ?>
@@ -76,6 +86,7 @@ uwb_header_nav('biblio', $isAdmin ? nav_admin() : nav_etudiant());
 <div class="col-md-4"><label class="form-label">Titre *</label><input name="titre" class="form-control" value="<?= e($edit['titre'] ?? '') ?>" required></div>
 <div class="col-md-3"><label class="form-label">Auteur *</label><input name="auteur" class="form-control" value="<?= e($edit['auteur'] ?? '') ?>" required></div>
 <div class="col-md-2"><label class="form-label">Catégorie</label><select name="categorie" class="form-control"><?php foreach (['Informatique','Gestion','Méthodologie'] as $c): ?><option <?= ($edit['categorie'] ?? '')===$c?'selected':'' ?>><?= e($c) ?></option><?php endforeach; ?></select></div>
+<div class="col-md-2"><label class="form-label">Faculté</label><select name="faculte" class="form-control"><option value="—">— Toutes —</option><?php foreach ($facultes as $f): ?><option value="<?= e($f['nom']) ?>" <?= ($edit['faculte'] ?? '')===$f['nom']?'selected':'' ?>><?= e($f['nom']) ?></option><?php endforeach; ?></select></div>
 <div class="col-md-3"><label class="form-label">Année</label><input name="annee" type="number" min="1990" max="2030" value="<?= (int)($edit['annee'] ?? 2026) ?>" class="form-control"></div>
 <div class="col-md-4"><label class="form-label">Image (URL)</label><input name="cover_url" class="form-control" value="<?= e((!str_starts_with($edit['cover'] ?? '', 'uploads/') && !str_starts_with($edit['cover'] ?? '', 'data:')) ? ($edit['cover'] ?? '') : '') ?>" placeholder="https://…"></div>
 <div class="col-md-4"><label class="form-label">Image (fichier)</label><input name="cover_file" type="file" accept="image/*" class="form-control">

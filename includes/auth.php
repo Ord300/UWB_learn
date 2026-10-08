@@ -38,7 +38,8 @@ function login_user(array $row): void {
         'nom' => $row['nom'],
         'email' => $row['email'],
         'role' => $row['role'],
-        'filiere' => $row['filiere'] ?? '—',
+        'filiere' => $row['faculte'] ?? $row['filiere'] ?? '—',
+        'faculte' => $row['faculte'] ?? $row['filiere'] ?? '—',
         'niveau' => $row['niveau'] ?? 'L3',
     ];
 }

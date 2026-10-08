@@ -6,7 +6,7 @@ if ($u['role'] === 'admin') $cours = db()->query('SELECT * FROM cours')->fetchAl
 else { $s = db()->prepare('SELECT * FROM cours WHERE enseignant_nom=?'); $s->execute([$u['nom']]); $cours = $s->fetchAll(); }
 $s = db()->prepare('SELECT ev.*, (SELECT COUNT(*) FROM soumissions WHERE evaluation_id=ev.id) nb FROM evaluations ev WHERE prof_nom=? ORDER BY id DESC');
 $s->execute([$u['nom']]); $list = $s->fetchAll();
-try { $fils = array_column(db()->query('SELECT nom FROM filieres ORDER BY nom')->fetchAll(), 'nom'); }
+try { $fils = array_column(db()->query('SELECT nom FROM facultes ORDER BY nom')->fetchAll(), 'nom'); }
 catch (Throwable $t) { $fils = []; }
 if (!$fils) $fils = ['Informatique','Gestion','Méthodologie'];
 uwb_head('Créer une évaluation', 'Builder de sujets.');
@@ -27,7 +27,7 @@ uwb_header_nav('creer', nav_prof());
 <div class="container"><div class="d-flex justify-content-end mb-3" data-aos="fade-up"><button class="btn-uwb" data-bs-toggle="modal" data-bs-target="#evalModal"><i class="bi bi-plus-circle"></i> Créer une évaluation</button></div>
 <div class="panel-pro" data-aos="fade-up"><div class="panel-head"><strong><i class="bi bi-archive"></i> Sujets publiés</strong><small><?= count($list) ?> sujet(s)</small></div>
 <?php foreach ($list as $ev2): ?>
-<div class="mini-row"><div style="min-width:0"><strong><?= e($ev2['titre']) ?></strong><br><small><?= e($ev2['filiere'] ?? '—') ?> • <?= e($ev2['niveau'] ?? '—') ?> • <?= (int)$ev2['nb'] ?> copie(s) • <?= (int)$ev2['duree'] ?> min</small></div>
+<div class="mini-row"><div style="min-width:0"><strong><?= e($ev2['titre']) ?></strong><br><small><?= e($ev2['faculte'] ?? '—') ?> • <?= e($ev2['niveau'] ?? '—') ?> • <?= (int)$ev2['nb'] ?> copie(s) • <?= (int)$ev2['duree'] ?> min</small></div>
 <div class="mini-actions"><a class="icon-btn ok" href="validation-ia.php"><i class="bi bi-robot"></i></a>
 <a class="icon-btn danger" href="../actions/evaluation.php?action=delete&id=<?= (int)$ev2['id'] ?>" onclick="return confirm('Supprimer ce sujet ?')"><i class="bi bi-trash"></i></a></div></div>
 <?php endforeach; if (!count($list)): ?><p class="text-muted small mb-0">Aucun sujet publié.</p><?php endif; ?>
@@ -37,8 +37,8 @@ uwb_header_nav('creer', nav_prof());
 <form method="post" action="../actions/evaluation.php" class="form-min" id="builderForm">
 <div class="row g-3">
 <div class="col-md-4"><label class="form-label">Titre du sujet *</label><input name="titre" class="form-control" placeholder="Ex : Quiz PHP — Session 2" required></div>
-<div class="col-md-3"><label class="form-label">Cours rattaché</label><select name="cours_id" id="evCours" class="form-control"><?php foreach ($cours as $c): ?><option value="<?= (int)$c['id'] ?>" data-fil="<?= e($c['filiere'] ?? 'Informatique') ?>" data-niv="<?= e($c['niveau'] ?? 'L3') ?>"><?= e($c['titre']) ?></option><?php endforeach; ?></select></div>
-<div class="col-md-2"><label class="form-label">Filière <small class="text-muted">(auto)</small></label><select id="evFil" class="form-control" disabled><?php foreach ($fils as $f): ?><option><?= e($f) ?></option><?php endforeach; ?></select><input type="hidden" name="filiere" id="evFilH" value="Informatique"></div>
+<div class="col-md-3"><label class="form-label">Cours rattaché</label><select name="cours_id" id="evCours" class="form-control"><?php foreach ($cours as $c): ?><option value="<?= (int)$c['id'] ?>" data-fil="<?= e($c['faculte'] ?? 'Informatique') ?>" data-niv="<?= e($c['niveau'] ?? 'L3') ?>"><?= e($c['titre']) ?></option><?php endforeach; ?></select></div>
+<div class="col-md-2"><label class="form-label">Faculté <small class="text-muted">(auto)</small></label><select id="evFil" class="form-control" disabled><?php foreach ($fils as $f): ?><option><?= e($f) ?></option><?php endforeach; ?></select><input type="hidden" name="faculte" id="evFilH" value="Informatique"></div>
 <div class="col-md-2"><label class="form-label">Niveau <small class="text-muted">(auto)</small></label><select id="evNiv" class="form-control" disabled><option>L1</option><option>L2</option><option selected>L3</option><option>M1</option><option>M2</option><option>Autre</option></select><input type="hidden" name="niveau" id="evNivH" value="L3"></div>
 <div class="col-md-1"><label class="form-label">Durée</label><input name="duree" type="number" min="5" max="180" value="30" class="form-control"></div>
 </div>
@@ -52,13 +52,13 @@ uwb_header_nav('creer', nav_prof());
 </main>
 <script>
 let BQ=[];
-// Pré-remplit filière/niveau depuis le cours rattaché
+// Pré-remplit faculté/niveau depuis le cours rattaché
 function syncFilNiv() {
   const sel = document.getElementById('evCours'); if (!sel) return;
   const o = sel.selectedOptions[0]; if (!o) return;
   const fil = o.dataset.fil || 'Informatique', niv = o.dataset.niv || 'L3';
   const fS = document.getElementById('evFil'), nS = document.getElementById('evNiv');
-  // Ajoute l'option si la filière du cours n'est pas dans la liste, puis verrouille
+  // Ajoute l'option si la faculté du cours n'est pas dans la liste, puis verrouille
   if (fS && ![...fS.options].some(x => x.value === fil)) fS.add(new Option(fil, fil));
   if (fS) fS.value = fil;
   if (nS) nS.value = niv;

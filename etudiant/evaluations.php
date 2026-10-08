@@ -4,19 +4,17 @@ $u = require_login();
 if ($u['role'] === 'admin') { header('Location: ../admin/dashboard.php'); exit; }
 $flash = flash();
 // Migration auto : colonnes ajoutées après la création initiale
-try { if (!db()->query("SHOW COLUMNS FROM evaluations LIKE 'filiere'")->fetch()) db()->exec("ALTER TABLE evaluations ADD COLUMN filiere VARCHAR(100) NOT NULL DEFAULT 'Informatique'"); } catch (Throwable $t) {}
+try { if (!db()->query("SHOW COLUMNS FROM evaluations LIKE 'faculte'")->fetch()) db()->exec("ALTER TABLE evaluations ADD COLUMN faculte VARCHAR(150) NOT NULL DEFAULT 'Informatique'"); } catch (Throwable $t) {}
 try { if (!db()->query("SHOW COLUMNS FROM evaluations LIKE 'niveau'")->fetch()) db()->exec("ALTER TABLE evaluations ADD COLUMN niveau VARCHAR(10) NOT NULL DEFAULT 'L3'"); } catch (Throwable $t) {}
-// Étudiant : seulement les évaluations de sa filière + niveau (frais depuis la base)
+// Étudiant : seulement les évaluations de sa faculté (« — » = toutes facultés)
 $scope = '';
 $sql = 'SELECT ev.*, c.titre AS cours_titre FROM evaluations ev LEFT JOIN cours c ON c.id=ev.cours_id WHERE 1=1'; $ep = [];
 if ($u['role'] === 'etudiant') {
     $me = null;
-    try { $s = db()->prepare('SELECT filiere,niveau FROM users WHERE id=?'); $s->execute([$u['id']]); $me = $s->fetch(); } catch (Throwable $t) {}
-    $myFil = trim((string)($me['filiere'] ?? $u['filiere'] ?? ''));
-    $myNiv = trim((string)($me['niveau'] ?? $u['niveau'] ?? ''));
-    if ($myFil !== '' && $myFil !== '—') {
-        $sql .= ' AND ev.filiere=?'; $ep[] = $myFil; $scope = $myFil;
-        if ($myNiv !== '' && $myNiv !== '—' && $myNiv !== 'Autre') { $sql .= ' AND ev.niveau=?'; $ep[] = $myNiv; $scope .= ' • ' . $myNiv; }
+    try { $s = db()->prepare('SELECT faculte FROM users WHERE id=?'); $s->execute([$u['id']]); $me = $s->fetch(); } catch (Throwable $t) {}
+    $myFac = trim((string)($me['faculte'] ?? $u['faculte'] ?? $u['filiere'] ?? ''));
+    if ($myFac !== '' && $myFac !== '—') {
+        $sql .= " AND (ev.faculte=? OR ev.faculte='—' OR ev.faculte='')"; $ep[] = $myFac; $scope = $myFac;
     }
 }
 $sql .= ' ORDER BY ev.id';
@@ -91,7 +89,7 @@ uwb_header_nav('evals', $u['role'] === 'professeur' ? nav_prof() : nav_etudiant(
 <?php endif; ?>
 <?php elseif ($ev): ?>
 <div class="alert alert-secondary">Sujet : <strong><?= e($ev['titre']) ?></strong> — <?= count($questions) ?> questions, <?= $totalPts ?> pts, <?= (int)$ev['duree'] ?> min. Les étudiants répondent ici ; validez dans <a href="../prof/validation-ia.php">Validation IA</a>.</div>
-<?php else: ?><p class="text-muted"><?= $scope ? 'Aucun sujet pour votre filière / niveau pour le moment.' : 'Aucun sujet publié.' ?></p><?php endif; ?>
+<?php else: ?><p class="text-muted"><?= $scope ? 'Aucun sujet pour votre faculté pour le moment.' : 'Aucun sujet publié.' ?></p><?php endif; ?>
 </div></section>
 <?php if ($u['role'] !== 'etudiant'): ?>
 <section class="why-us section"><div class="container section-title" data-aos="fade-up"><h2><i class="bi bi-check2-circle"></i> Vérification professeur</h2><p><?= count($att) ?> copie(s) en attente</p></div>

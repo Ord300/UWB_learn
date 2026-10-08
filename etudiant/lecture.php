@@ -8,6 +8,15 @@ $st = db()->prepare('SELECT * FROM livres WHERE id=?');
 $st->execute([$id]);
 $l = $st->fetch();
 if (!$l) { flash('Ressource introuvable.'); header('Location: bibliotheque.php'); exit; }
+// Étudiant : uniquement les ressources de sa faculté (« — » = toutes)
+if ($u['role'] === 'etudiant') {
+    $myFac = trim((string)($u['faculte'] ?? $u['filiere'] ?? ''));
+    $lFac = trim((string)($l['faculte'] ?? '—'));
+    if ($myFac !== '' && $myFac !== '—' && $lFac !== '—' && $lFac !== '' && $lFac !== $myFac) {
+        flash('Cette ressource n\'appartient pas à votre faculté.');
+        header('Location: bibliotheque.php'); exit;
+    }
+}
 // Fichier réel = uploads/... vérifié (anti-traversal)
 $rel = trim((string)($l['fichier'] ?? ''));
 $abs = '';

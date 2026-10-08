@@ -7,6 +7,17 @@ $action = $_POST['action'] ?? $_GET['action'] ?? '';
 $back = $_SERVER['HTTP_REFERER'] ?? '../etudiant/bibliotheque.php';
 
 if ($action === 'download' && isset($_GET['id'])) {
+    // Étudiant : uniquement les ressources de sa faculté (« — » = toutes)
+    if ($u['role'] === 'etudiant') {
+        try {
+            $sf = db()->prepare('SELECT faculte FROM livres WHERE id=?'); $sf->execute([(int)$_GET['id']]); $lf = $sf->fetch();
+            $myFac = trim((string)($u['faculte'] ?? $u['filiere'] ?? ''));
+            if ($lf && $myFac !== '' && $myFac !== '—' && ($lf['faculte'] ?? '—') !== '—' && $lf['faculte'] !== $myFac) {
+                flash('Cette ressource n\'appartient pas à votre faculté.');
+                header('Location: ../etudiant/bibliotheque.php'); exit;
+            }
+        } catch (Throwable $t) {}
+    }
     db()->prepare('UPDATE livres SET telechargements=telechargements+1 WHERE id=?')->execute([(int)$_GET['id']]);
     // Fichier réel si présent, sinon compteur seul (démo)
     $s = db()->prepare('SELECT fichier FROM livres WHERE id=?');
@@ -32,6 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $titre = trim($_POST['titre'] ?? '');
     $auteur = trim($_POST['auteur'] ?? '');
     $cat = trim($_POST['categorie'] ?? 'Informatique');
+    $fac = trim($_POST['faculte'] ?? ($_POST['filiere'] ?? '—')) ?: '—';
     $annee = (int)($_POST['annee'] ?? 2026);
     $resume = trim($_POST['resume'] ?? '');
     $mots = trim($_POST['mots'] ?? '');
@@ -92,11 +104,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $old = db()->prepare('SELECT cover,fichier FROM livres WHERE id=?'); $old->execute([$id]); $o = $old->fetch();
         if ($cover === '') $cover = $o['cover'] ?? '';
         if ($fichier === '') $fichier = $o['fichier'] ?? '';
-        db()->prepare('UPDATE livres SET titre=?,auteur=?,categorie=?,annee=?,resume=?,mots=?,cover=?,fichier=? WHERE id=?')
-          ->execute([$titre,$auteur,$cat,$annee,$resume,$mots,$cover,$fichier,$id]);
+        db()->prepare('UPDATE livres SET titre=?,auteur=?,categorie=?,annee=?,resume=?,mots=?,cover=?,fichier=?,faculte=? WHERE id=?')
+          ->execute([$titre,$auteur,$cat,$annee,$resume,$mots,$cover,$fichier,$fac,$id]);
     } else {
-        db()->prepare('INSERT INTO livres (titre,auteur,categorie,annee,resume,mots,cover,fichier,telechargements) VALUES (?,?,?,?,?,?,?,?,0)')
-          ->execute([$titre,$auteur,$cat,$annee,$resume ?: ('Ajouté par ' . $u['nom']),$mots,$cover,$fichier]);
+        db()->prepare('INSERT INTO livres (titre,auteur,categorie,annee,resume,mots,cover,fichier,faculte,telechargements) VALUES (?,?,?,?,?,?,?,?,?,0)')
+          ->execute([$titre,$auteur,$cat,$annee,$resume ?: ('Ajouté par ' . $u['nom']),$mots,$cover,$fichier,$fac]);
+        // Notification : étudiants de la faculté (« — » = toutes)
+        require_once __DIR__ . '/../includes/notifications.php';
+        notifier_groupe('Nouvelle ressource en bibliothèque', $titre . ' — ' . $auteur . ' • faculté : ' . $fac . '.', 'etudiant/bibliotheque.php', 'etudiant', $fac);
     }
     flash('Catalogue mis à jour.', 'success');
     header('Location: ' . $back); exit;

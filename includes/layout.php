@@ -20,13 +20,18 @@ function uwb_head(string $title, string $desc = ''): void {
 <link href="<?= $b ?>assets/vendor/aos/aos.css" rel="stylesheet">
 <link href="<?= $b ?>assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
 <link href="<?= $b ?>assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+<style>.notif-link{position:relative}.notif-badge{position:absolute;top:-8px;right:-12px;min-width:18px;height:18px;line-height:18px;padding:0 5px;border-radius:9px;background:#e63946;color:#fff!important;font-size:.68rem;font-weight:700;text-align:center}</style>
 </head>
 <body class="index-page">
 <?php
 }
 
 function uwb_header_nav(string $active = '', array $links = []): void {
-    $b = base_url(); ?>
+    $b = base_url();
+    $nbNotif = 0; $me = current_user();
+    if ($me) {
+        try { require_once __DIR__ . '/notifications.php'; $nbNotif = nb_notifs_non_lues((int)$me['id']); } catch (Throwable $t) {}
+    } ?>
 <header id="header" class="header d-flex align-items-center sticky-top">
 <div class="container position-relative d-flex align-items-center justify-content-between">
 <a href="<?= $b ?>index.php" class="logo d-flex align-items-center me-auto me-xl-0"><img src="<?= $b ?>forms/uwbfin.webp" alt="UWB"></a>
@@ -34,6 +39,9 @@ function uwb_header_nav(string $active = '', array $links = []): void {
 <?php foreach ($links as [$href, $icon, $label, $key]): ?>
 <li><a href="<?= e($href) ?>" class="<?= $active === $key ? 'active' : '' ?>"><i class="bi <?= e($icon) ?>"></i> <?= e($label) ?></a></li>
 <?php endforeach; ?>
+<?php if ($me): ?>
+<li><a href="<?= $b ?>notifications.php" class="notif-link <?= $active === 'notifs' ? 'active' : '' ?>"><i class="bi bi-bell"></i> Notifications<?php if ($nbNotif): ?> <span class="notif-badge"><?= $nbNotif ?></span><?php endif; ?></a></li>
+<?php endif; ?>
 </ul><i class="mobile-nav-toggle d-lg-none bi bi-list"></i></nav>
 <a class="btn-getstarted" href="<?= $b ?>actions/logout.php">Déconnexion</a>
 </div></header>
@@ -121,6 +129,6 @@ function nav_admin(): array {
         [$b . 'admin/dashboard.php', 'bi-speedometer2', 'Administration', 'admin'],
         [$b . 'etudiant/cours.php', 'bi-mortarboard', 'Cours & Meet', 'cours'],
         [$b . 'etudiant/bibliotheque.php', 'bi-book', 'Bibliothèque', 'biblio'],
-        [$b . 'admin/filieres.php', 'bi-diagram-3', 'Filières', 'filieres'],
+        [$b . 'admin/facultes.php', 'bi-diagram-3', 'Facultés', 'facultes'],
     ];
 }

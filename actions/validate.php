@@ -15,6 +15,13 @@ if ($u['role'] !== 'admin') {
     if (!$ev || $ev['prof_nom'] !== $u['nom']) { flash('Vous ne pouvez valider que vos sujets.'); header('Location: ../prof/validation-ia.php'); exit; }
 }
 db()->prepare("UPDATE soumissions SET note_finale=?, commentaire_prof=?, statut='validee' WHERE id=?")->execute([$note, $com, $id]);
+// Notification : l'étudiant apprend sa note finale
+if (!empty($row['etudiant_id'])) {
+    require_once __DIR__ . '/../includes/notifications.php';
+    $titreEval = '';
+    try { $e2 = db()->prepare('SELECT titre FROM evaluations WHERE id=?'); $e2->execute([$row['evaluation_id']]); $r2 = $e2->fetch(); $titreEval = $r2['titre'] ?? ''; } catch (Throwable $t) {}
+    notifier((int)$row['etudiant_id'], 'Copie validée : ' . $note . '/20', 'Évaluation « ' . $titreEval . ' » — commentaire : ' . $com, 'etudiant/resultats.php');
+}
 flash('Copie validée : ' . $note . '/20.', 'success');
 header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '../prof/validation-ia.php'));
 exit;

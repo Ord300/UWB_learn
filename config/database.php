@@ -54,8 +54,8 @@ function db(): PDO {
                   . 'GRANT ALL PRIVILEGES ON `uwb_learn`.* TO \'uwb\'@\'127.0.0.1\'; FLUSH PRIVILEGES;"</pre>'
                   . '<p>Puis rechargez cette page (le site réessaie automatiquement avec <code>uwb</code>).<br>'
                   . 'Ensuite : <a href="install.php">install.php</a> pour créer les tables.</p>'
-                : '<p>Créez la base puis importez <code>database.sql</code> et <code>seed.sql</code> :</p>'
-                  . '<pre>sudo mysql &lt; database.sql\nsudo mysql uwb_learn &lt; seed.sql</pre>')
+                : '<p>Créez la base puis importez <code>uwb_learn.sql</code> :</p>'
+                  . '<pre>mysql -u root --default-character-set=utf8mb4 &lt; uwb_learn.sql</pre>')
             . '</div>');
     }
     return $pdo;

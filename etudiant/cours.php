@@ -2,22 +2,20 @@
 require_once __DIR__ . '/../includes/layout.php';
 $u = require_login();
 // Migration auto : colonnes ajoutées après la création initiale
-try { if (!db()->query("SHOW COLUMNS FROM cours LIKE 'filiere'")->fetch()) db()->exec("ALTER TABLE cours ADD COLUMN filiere VARCHAR(100) NOT NULL DEFAULT 'Informatique'"); } catch (Throwable $t) {}
+try { if (!db()->query("SHOW COLUMNS FROM cours LIKE 'faculte'")->fetch()) db()->exec("ALTER TABLE cours ADD COLUMN faculte VARCHAR(150) NOT NULL DEFAULT 'Informatique'"); } catch (Throwable $t) {}
 try { if (!db()->query("SHOW COLUMNS FROM users LIKE 'niveau'")->fetch()) db()->exec("ALTER TABLE users ADD COLUMN niveau VARCHAR(10) NOT NULL DEFAULT 'L3'"); } catch (Throwable $t) {}
 $q = trim($_GET['q'] ?? ''); $cat = trim($_GET['cat'] ?? '');
 $sql = 'SELECT * FROM cours WHERE 1=1'; $p = [];
 if ($cat !== '') { $sql .= ' AND categorie=?'; $p[] = $cat; }
 if ($q !== '') { $sql .= ' AND (titre LIKE ? OR description LIKE ? OR enseignant_nom LIKE ?)'; $p[] = "%$q%"; $p[] = "%$q%"; $p[] = "%$q%"; }
-// Étudiant : seulement les cours de sa filière + niveau (frais depuis la base)
+// Étudiant : seulement les cours de sa faculté (« — » = toutes facultés)
 $scope = '';
 if ($u['role'] === 'etudiant') {
     $me = null;
-    try { $s = db()->prepare('SELECT filiere,niveau FROM users WHERE id=?'); $s->execute([$u['id']]); $me = $s->fetch(); } catch (Throwable $t) {}
-    $myFil = trim((string)($me['filiere'] ?? $u['filiere'] ?? ''));
-    $myNiv = trim((string)($me['niveau'] ?? $u['niveau'] ?? ''));
-    if ($myFil !== '' && $myFil !== '—') {
-        $sql .= ' AND filiere=?'; $p[] = $myFil; $scope = $myFil;
-        if ($myNiv !== '' && $myNiv !== '—' && $myNiv !== 'Autre') { $sql .= ' AND niveau=?'; $p[] = $myNiv; $scope .= ' • ' . $myNiv; }
+    try { $s = db()->prepare('SELECT faculte FROM users WHERE id=?'); $s->execute([$u['id']]); $me = $s->fetch(); } catch (Throwable $t) {}
+    $myFac = trim((string)($me['faculte'] ?? $u['faculte'] ?? $u['filiere'] ?? ''));
+    if ($myFac !== '' && $myFac !== '—') {
+        $sql .= ' AND (faculte=? OR faculte=\'—\' OR faculte=\'\')'; $p[] = $myFac; $scope = $myFac;
     }
 }
 $sql .= ' ORDER BY id';
@@ -49,14 +47,14 @@ uwb_header_nav('cours', $u['role'] === 'professeur' ? nav_prof() : ($u['role'] =
 <?php if ($u['role'] === 'admin'): ?>
 <div class="panel-pro" data-aos="fade-up"><div class="panel-head"><strong><i class="bi bi-collection"></i> Cours publiés</strong><small><?= count($list) ?> cours</small></div>
 <?php foreach ($list as $x): ?>
-<div class="mini-row"><div style="min-width:0;flex:1"><strong><?= e($x['titre']) ?></strong><br><small><?= e($x['categorie']) ?> • <?= e($x['filiere'] ?? '—') ?> • <?= e($x['niveau']) ?> • <?= (int)$x['inscrits'] ?> inscrits • <?= e($x['seance_date']) ?></small></div>
+<div class="mini-row"><div style="min-width:0;flex:1"><strong><?= e($x['titre']) ?></strong><br><small><?= e($x['categorie']) ?> • <?= e($x['faculte'] ?? '—') ?> • <?= e($x['niveau']) ?> • <?= (int)$x['inscrits'] ?> inscrits • <?= e($x['seance_date']) ?></small></div>
 <div class="mini-actions"><a class="icon-btn ok" target="_blank" href="<?= e($x['meet_link']) ?>"><i class="bi bi-camera-video"></i></a>
 <a class="icon-btn danger" href="../actions/cours.php?action=delete&id=<?= (int)$x['id'] ?>" onclick="return confirm('Supprimer ce cours ?')"><i class="bi bi-trash"></i></a></div></div>
 <?php endforeach; ?></div>
 <?php else: ?>
 <div class="row g-4" data-aos="fade-up">
 <?php foreach ($list as $i => $x) echo uwb_cours_card($x, $i); ?>
-<?php if (!count($list)): ?><div class="col-12"><p class="text-muted text-center"><i class="bi bi-emoji-frown"></i> <?= $scope ? 'Aucun cours pour votre filière / niveau pour le moment.' : 'Aucun cours trouvé.' ?></p></div><?php endif; ?>
+<?php if (!count($list)): ?><div class="col-12"><p class="text-muted text-center"><i class="bi bi-emoji-frown"></i> <?= $scope ? 'Aucun cours pour votre faculté pour le moment.' : 'Aucun cours trouvé.' ?></p></div><?php endif; ?>
 </div>
 <?php endif; ?>
 </div></section>

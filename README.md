@@ -13,16 +13,21 @@ Conversion fidèle de la version statique (`localStorage`) vers **PHP 8 + MySQL 
 # éditez config/database.php (DB_HOST, DB_NAME, DB_USER, DB_PASS)
 
 # b) Créez + remplissez la base
-mysql -u root -p < database.sql
-mysql -u root -p uwb_learn < seed.sql
+mysql -u root --default-character-set=utf8mb4 < uwb_learn.sql
 
 # OU via navigateur :
-# http://localhost/Orbit/install.php  → bouton "Installer / Réinitialiser"
+# http://localhost/UWB_learn/install.php  → bouton "Installer / Réinitialiser"
 ```
 
 ## 3. Lancement
 - Placez le dossier sous `htdocs/` (XAMPP) ou `www/` (WAMP), puis :
-- `http://localhost/Orbit/index.php`
+- `http://localhost/UWB_learn/index.php`
+
+> **Inscription** : réservée aux **étudiants** (professeurs/admin créés par l'admin).
+> Chaque étudiant accède aux **cours, bibliothèque et évaluations de sa faculté**
+> (facultés : Médecine, ISTM, Économie, Communication, Droit, Théologie, Informatique, Gestion…).
+> Un **système de notifications** (cloche 🔔) signale les nouveaux cours/évaluations/ressources,
+> les copies validées et les diffusions de l'administration.
 
 Comptes démo :
 | Rôle | Email | Mot de passe |
@@ -36,11 +41,11 @@ Comptes démo :
 index.php / login.php / inscription.php / dashboard.php  # vitrine + auth
 etudiant/dashboard.php | cours.php | bibliotheque.php | evaluations.php | resultats.php
 prof/dashboard.php | mes-cours.php | creer-evaluation.php | validation-ia.php
-admin/dashboard.php | filieres.php
+admin/dashboard.php | facultes.php
 actions/  # login, register, logout, cours, livre, evaluation, submit_eval, validate, admin
 config/database.php  # PDO (modifiez ici)
 includes/auth.php | ia.php (moteur IA porté du JS) | layout.php (header/footer/cards)
-database.sql | seed.sql | install.php
+uwb_learn.sql | install.php
 uploads/  # couvertures + PDF uploadés
 assets/css/style.css  # INCHANGÉ
 ```

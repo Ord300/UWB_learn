@@ -21,7 +21,7 @@ uwb_header_nav('espace', nav_prof());
 <span class="role-avatar"><i class="bi bi-easel-fill"></i></span>
 <div><span class="hero-pill"><i class="bi bi-person-video3"></i> Espace professeur</span>
 <h2>Bienvenue, <?= e($u['nom']) ?></h2>
-<p class="mb-0"><?= e($u['filiere']) ?> • <?= e($u['email']) ?></p></div>
+<p class="mb-0"><?= e($u['faculte'] ?? $u['filiere']) ?> • <?= e($u['email']) ?></p></div>
 <div class="ms-auto d-flex gap-2 flex-wrap"><a href="creer-evaluation.php" class="btn-uwb-gold text-decoration-none"><i class="bi bi-journal-plus"></i> Créer une évaluation</a><a href="validation-ia.php" class="btn-uwb text-decoration-none" style="background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.4)"><i class="bi bi-robot"></i> File de validation IA</a></div>
 </div></div>
 <div class="stats-grid mt-4" data-aos="fade-up" data-aos-delay="150">

@@ -2,18 +2,23 @@
 require_once __DIR__ . '/../includes/layout.php';
 $u = require_login(['etudiant']);
 $flash = flash();
+// Faculté de l'étudiant : seuls cours/évaluations/ressources de sa faculté (« — » = toutes)
+$myFac = trim((string)($u['faculte'] ?? $u['filiere'] ?? ''));
+$scopeSql = ''; $scopeP = [];
+if ($myFac !== '' && $myFac !== '—') { $scopeSql = " AND (faculte=? OR faculte='—' OR faculte='')"; $scopeP = [$myFac]; }
 // KPIs
-$nbCours = (int)db()->query('SELECT COUNT(*) c FROM cours')->fetch()['c'];
+$stC = db()->prepare('SELECT COUNT(*) c FROM cours WHERE 1=1' . $scopeSql); $stC->execute($scopeP);
+$nbCours = (int)$stC->fetch()['c'];
 $mesSoum = db()->prepare('SELECT s.*, e.titre FROM soumissions s LEFT JOIN evaluations e ON e.id=s.evaluation_id WHERE s.etudiant_id=? ORDER BY s.id DESC');
 $mesSoum->execute([$u['id']]); $mesSoum = $mesSoum->fetchAll();
 $vals = array_filter($mesSoum, fn($x) => $x['statut'] === 'validee');
 $moy = count($vals) ? number_format(array_sum(array_map(fn($x) => $x['note_finale'] ?? $x['note_ia'], $vals)) / count($vals), 1) : '—';
-$evals = db()->query('SELECT * FROM evaluations ORDER BY id')->fetchAll();
+$stE = db()->prepare('SELECT * FROM evaluations WHERE 1=1' . $scopeSql . ' ORDER BY id'); $stE->execute($scopeP); $evals = $stE->fetchAll();
 $idsSoumis = array_column($mesSoum, 'evaluation_id');
 $aFaire = array_filter($evals, fn($e) => !in_array($e['id'], $idsSoumis));
-$meets = db()->query('SELECT * FROM cours ORDER BY id LIMIT 3')->fetchAll();
-$livres = db()->query('SELECT * FROM livres ORDER BY telechargements DESC')->fetchAll();
-$sug = ia_suggestions($livres, $u['filiere'], 'Informatique', [$u['filiere']]);
+$stM = db()->prepare('SELECT * FROM cours WHERE 1=1' . $scopeSql . ' ORDER BY id LIMIT 3'); $stM->execute($scopeP); $meets = $stM->fetchAll();
+$stL = db()->prepare('SELECT * FROM livres WHERE 1=1' . $scopeSql . ' ORDER BY telechargements DESC'); $stL->execute($scopeP); $livres = $stL->fetchAll();
+$sug = ia_suggestions($livres, $myFac, 'Informatique', [$myFac]);
 uwb_head('Mon espace étudiant', 'Espace étudiant UWB.');
 uwb_header_nav('espace', nav_etudiant());
 ?>
@@ -25,7 +30,7 @@ uwb_header_nav('espace', nav_etudiant());
 <span class="role-avatar"><i class="bi bi-mortarboard-fill"></i></span>
 <div><span class="hero-pill"><i class="bi bi-person-badge"></i> Espace étudiant</span>
 <h2>Bienvenue, <?= e($u['nom']) ?></h2>
-<p class="mb-0"><?= e($u['filiere']) ?> • <?= e($u['email']) ?></p></div>
+<p class="mb-0"><?= e($u['faculte'] ?? $u['filiere']) ?> • <?= e($u['email']) ?></p></div>
 <div class="ms-auto d-flex gap-2"><a href="cours.php" class="btn-uwb-gold text-decoration-none"><i class="bi bi-play-circle"></i> Continuer mes cours</a>
 <button class="btn-uwb text-decoration-none" style="background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.4)" data-bs-toggle="modal" data-bs-target="#profilModal"><i class="bi bi-pencil"></i> Profil</button></div>
 </div></div>
@@ -66,6 +71,6 @@ uwb_header_nav('espace', nav_etudiant());
 <input type="hidden" name="kind" value="profil">
 <h5><i class="bi bi-pencil"></i> Mon profil</h5>
 <label class="form-label">Nom</label><input name="nom" class="form-control" value="<?= e($u['nom']) ?>" required>
-<label class="form-label mt-2">Filière</label><input name="filiere" class="form-control" value="<?= e($u['filiere']) ?>">
+<label class="form-label mt-2">Faculté</label><input name="faculte" class="form-control" value="<?= e($u['faculte'] ?? $u['filiere']) ?>">
 <button class="btn-uwb mt-3 w-100">Enregistrer</button></form></div></div></div>
 <?php uwb_footer('UWB E-learning — Espace étudiant.'); ?>

@@ -23,15 +23,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $types = $_POST['qtype'] ?? [];
     if ($titre === '' || !count($types)) { flash('Titre + au moins une question requis.'); header('Location: ../prof/creer-evaluation.php'); exit; }
     // Migration auto : colonnes ajoutées après la création initiale
-    try { if (!db()->query("SHOW COLUMNS FROM evaluations LIKE 'filiere'")->fetch()) db()->exec("ALTER TABLE evaluations ADD COLUMN filiere VARCHAR(100) NOT NULL DEFAULT 'Informatique'"); } catch (Throwable $t) {}
+    try { if (!db()->query("SHOW COLUMNS FROM evaluations LIKE 'faculte'")->fetch()) db()->exec("ALTER TABLE evaluations ADD COLUMN faculte VARCHAR(150) NOT NULL DEFAULT 'Informatique'"); } catch (Throwable $t) {}
     try { if (!db()->query("SHOW COLUMNS FROM evaluations LIKE 'niveau'")->fetch()) db()->exec("ALTER TABLE evaluations ADD COLUMN niveau VARCHAR(10) NOT NULL DEFAULT 'L3'"); } catch (Throwable $t) {}
     $fil = 'Informatique'; $niv = 'L3';
-    // Filière/niveau verrouillés : toujours ceux du cours rattaché (champs non modifiables)
+    // Faculté/niveau verrouillés : toujours ceux du cours rattaché (champs non modifiables)
     if ($coursId) {
-        try { $cc = db()->prepare('SELECT filiere,niveau FROM cours WHERE id=?'); $cc->execute([$coursId]); $crow = $cc->fetch();
-            if ($crow) { $fil = $crow['filiere'] ?: $fil; $niv = $crow['niveau'] ?: $niv; } } catch (Throwable $t) {}
+        try { $cc = db()->prepare('SELECT faculte,niveau FROM cours WHERE id=?'); $cc->execute([$coursId]); $crow = $cc->fetch();
+            if ($crow) { $fil = $crow['faculte'] ?: $fil; $niv = $crow['niveau'] ?: $niv; } } catch (Throwable $t) {}
     }
-    $ins = db()->prepare('INSERT INTO evaluations (cours_id,titre,prof_id,prof_nom,filiere,niveau,duree,statut) VALUES (?,?,?,?,?,?,?,?)');
+    $ins = db()->prepare('INSERT INTO evaluations (cours_id,titre,prof_id,prof_nom,faculte,niveau,duree,statut) VALUES (?,?,?,?,?,?,?,?)');
     $ins->execute([$coursId, $titre, $u['id'], $u['nom'], $fil, $niv, $duree, 'publiée']);
     $evalId = (int)db()->lastInsertId();
     $qins = db()->prepare('INSERT INTO questions (evaluation_id,qkey,type,enonce,choix,bonne,mots_cles,points) VALUES (?,?,?,?,?,?,?,?)');
@@ -53,6 +53,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $qins->execute([$evalId, 'q' . $n, 'ouverte', $en, '', '', $mots, $pts]);
         }
     }
+    // Notification : étudiants de la faculté concernée (« — » = toutes)
+    require_once __DIR__ . '/../includes/notifications.php';
+    notifier_groupe('Nouvelle évaluation publiée', $titre . ' — ' . $u['nom'] . ' • faculté : ' . $fil . ' • niveau ' . $niv . ' • ' . $duree . ' min.', 'etudiant/evaluations.php', 'etudiant', $fil);
     flash('Évaluation publiée.', 'success');
     header('Location: ../prof/creer-evaluation.php'); exit;
 }

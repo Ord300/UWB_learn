@@ -5,7 +5,7 @@ $flash = flash();
 if ($u['role'] === 'admin') $list = db()->query('SELECT * FROM cours ORDER BY id DESC')->fetchAll();
 else { $s = db()->prepare('SELECT * FROM cours WHERE enseignant_nom=? ORDER BY id DESC'); $s->execute([$u['nom']]); $list = $s->fetchAll(); }
 $inscrits = array_sum(array_column($list, 'inscrits'));
-try { $fils = array_column(db()->query('SELECT nom FROM filieres ORDER BY nom')->fetchAll(), 'nom'); }
+try { $fils = array_column(db()->query('SELECT nom FROM facultes ORDER BY nom')->fetchAll(), 'nom'); }
 catch (Throwable $t) { $fils = []; }
 if (!$fils) $fils = ['Informatique','Gestion','Méthodologie'];
 $edit = null;
@@ -28,7 +28,7 @@ uwb_header_nav('cours', nav_prof());
 <span class="role-avatar"><i class="bi bi-journals"></i></span>
 <div><span class="hero-pill"><i class="bi bi-mortarboard"></i> Mes cours & séances Meet</span>
 <h2>Mes cours, <?= e($u['nom']) ?></h2>
-<p class="mb-0"><?= e($u['filiere']) ?> • <?= e($u['email']) ?></p></div>
+<p class="mb-0"><?= e($u['faculte'] ?? $u['filiere']) ?> • <?= e($u['email']) ?></p></div>
 </div></div>
 <div class="stats-grid mt-4" data-aos="fade-up" data-aos-delay="150">
 <div class="stat-card stat-card-primary"><div class="stat-icon-wrap"><i class="bi bi-journals"></i></div><div class="stat-info"><span class="stat-value"><?= count($list) ?></span><span class="stat-title">Cours publiés</span></div></div>
@@ -40,7 +40,7 @@ uwb_header_nav('cours', nav_prof());
 <div class="container"><div class="d-flex justify-content-end mb-3" data-aos="fade-up"><button class="btn-uwb" data-bs-toggle="modal" data-bs-target="#coursModal"><i class="bi bi-plus-circle"></i> Ajouter un cours</button></div>
 <div class="panel-pro" data-aos="fade-up"><div class="panel-head"><strong><i class="bi bi-collection"></i> Cours publiés</strong><small><?= count($list) ?> cours</small></div>
 <?php foreach ($list as $c): ?>
-<div class="mini-row"><div style="min-width:0"><strong><?= e($c['titre']) ?></strong><br><small><?= e($c['categorie']) ?> • <?= e($c['filiere'] ?? '—') ?> • <?= e($c['niveau']) ?> • <?= (int)$c['inscrits'] ?> inscrits • <?= e($c['seance_date']) ?></small></div>
+<div class="mini-row"><div style="min-width:0"><strong><?= e($c['titre']) ?></strong><br><small><?= e($c['categorie']) ?> • <?= e($c['faculte'] ?? '—') ?> • <?= e($c['niveau']) ?> • <?= (int)$c['inscrits'] ?> inscrits • <?= e($c['seance_date']) ?></small></div>
 <div class="mini-actions"><a class="icon-btn ok" target="_blank" href="<?= e($c['meet_link']) ?>"><i class="bi bi-camera-video"></i></a>
 <a class="icon-btn" href="?edit=<?= (int)$c['id'] ?>"><i class="bi bi-pencil"></i></a>
 <a class="icon-btn danger" href="../actions/cours.php?action=delete&id=<?= (int)$c['id'] ?>" onclick="return confirm('Supprimer ce cours ?')"><i class="bi bi-trash"></i></a></div></div>
@@ -51,7 +51,7 @@ uwb_header_nav('cours', nav_prof());
 <input type="hidden" name="id" value="<?= $edit ? (int)$edit['id'] : 0 ?>">
 <div class="col-12"><label class="form-label">Titre *</label><input name="titre" class="form-control" value="<?= e($edit['titre'] ?? '') ?>" placeholder="Ex : Algorithmes L1" required></div>
 <div class="col-md-4"><label class="form-label">Catégorie *</label><input name="categorie" class="form-control" value="<?= e($edit['categorie'] ?? 'Informatique') ?>" required></div>
-<div class="col-md-4"><label class="form-label">Filière *</label><select name="filiere" class="form-control"><?php foreach ($fils as $f): ?><option <?= ($edit['filiere'] ?? 'Informatique')===$f?'selected':'' ?>><?= e($f) ?></option><?php endforeach; ?></select></div>
+<div class="col-md-4"><label class="form-label">Faculté *</label><select name="faculte" class="form-control"><?php foreach ($fils as $f): ?><option <?= ($edit['faculte'] ?? 'Informatique')===$f?'selected':'' ?>><?= e($f) ?></option><?php endforeach; ?></select></div>
 <div class="col-md-4"><label class="form-label">Niveau</label><select name="niveau" class="form-control"><?php foreach (['L1','L2','L3','M1','M2','Autre'] as $n): ?><option <?= ($edit['niveau'] ?? 'L3')===$n?'selected':'' ?>><?= $n ?></option><?php endforeach; ?></select></div>
 <div class="col-md-6"><label class="form-label">Date séance</label><input name="seance_jour" type="date" value="<?= e($editJour) ?>" class="form-control"></div>
 <div class="col-md-6"><label class="form-label">Heure séance</label><input name="seance_heure" type="time" value="<?= e($editHeure) ?>" class="form-control"></div>

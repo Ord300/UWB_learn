@@ -151,7 +151,7 @@ window.addEventListener('pagehide', ()=>{
 <strong><i class="bi bi-play-circle"></i> Prêt à commencer ?</strong>
 <ul class="mb-0 mt-2">
 <?php if ($ouvAt || $cloAt): ?><li>Fenêtre d'accès : <strong><?= $ouvAt ? e(dt_fr($ouvAt)) : 'immédiat' ?></strong> → <strong><?= $cloAt ? e(dt_fr($cloAt)) : 'sans limite' ?></strong> — après la clôture, plus aucun accès.</li><?php endif; ?>
-<li>Délai autorisé : <strong><?= (int)$ev['duree'] ?> min</strong> — la session démarre à votre clic et se termine automatiquement à l'heure de fin (jamais au-delà de la clôture).</li>
+<li>Durée de la session : <strong><?= (int)$ev['duree'] ?> min</strong> — elle démarre à votre clic et se termine automatiquement à l'heure de fin (jamais au-delà de la clôture).</li>
 <li>Pas de compte à rebours : l'heure de <strong>début</strong> et l'heure de <strong>fin</strong> vous sont affichées pendant toute la session.</li>
 <li>Vos réponses sont sauvegardées automatiquement.</li>
 <li class="text-danger">⚠ Quitter la page pendant la session soumet votre copie immédiatement (tentative de triche).</li>

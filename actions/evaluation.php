@@ -20,7 +20,7 @@ if (($_GET['action'] ?? '') === 'delete' && isset($_GET['id'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $titre = trim($_POST['titre'] ?? '');
     $coursId = (int)($_POST['cours_id'] ?? 0) ?: null;
-    $duree = max(5, min(180, (int)($_POST['duree'] ?? 30)));
+    $duree = 30; // plus de champ « Délai » : durée fixe, bornée par la clôture de la fenêtre
     // Fenêtre d'accès (datetime-local → 'YYYY-MM-DD HH:MM'), optionnelle
     $dtLocal = function ($v) { $v = trim((string)$v); return preg_match('/^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})/', $v, $m) ? $m[1] . ' ' . $m[2] : null; };
     $ouv = $dtLocal($_POST['ouverture'] ?? '');

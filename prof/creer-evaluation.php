@@ -37,10 +37,9 @@ uwb_header_nav('creer', nav_prof());
 <form method="post" action="../actions/evaluation.php" class="form-min" id="builderForm">
 <div class="row g-3">
 <div class="col-md-4"><label class="form-label">Titre du sujet *</label><input name="titre" class="form-control" placeholder="Ex : Quiz PHP — Session 2" required></div>
-<div class="col-md-3"><label class="form-label">Cours rattaché</label><select name="cours_id" id="evCours" class="form-control"><?php foreach ($cours as $c): ?><option value="<?= (int)$c['id'] ?>" data-fil="<?= e($c['faculte'] ?? 'Informatique') ?>" data-niv="<?= e($c['niveau'] ?? 'L3') ?>"><?= e($c['titre']) ?></option><?php endforeach; ?></select></div>
+<div class="col-md-4"><label class="form-label">Cours rattaché</label><select name="cours_id" id="evCours" class="form-control"><?php foreach ($cours as $c): ?><option value="<?= (int)$c['id'] ?>" data-fil="<?= e($c['faculte'] ?? 'Informatique') ?>" data-niv="<?= e($c['niveau'] ?? 'L3') ?>"><?= e($c['titre']) ?></option><?php endforeach; ?></select></div>
 <div class="col-md-2"><label class="form-label">Faculté <small class="text-muted">(auto)</small></label><select id="evFil" class="form-control" disabled><?php foreach ($fils as $f): ?><option><?= e($f) ?></option><?php endforeach; ?></select><input type="hidden" name="faculte" id="evFilH" value="Informatique"></div>
 <div class="col-md-2"><label class="form-label">Niveau <small class="text-muted">(auto)</small></label><select id="evNiv" class="form-control" disabled><option>L1</option><option>L2</option><option selected>L3</option><option>M1</option><option>M2</option><option>Autre</option></select><input type="hidden" name="niveau" id="evNivH" value="L3"></div>
-<div class="col-md-1"><label class="form-label">Délai</label><input name="duree" type="number" min="5" max="180" value="30" class="form-control" title="Durée en minutes : début = clic étudiant, fin = début + délai (bornée par la clôture)"></div>
 </div>
 <div class="row g-3 mt-0">
 <div class="col-md-4"><label class="form-label">Ouverture <small class="text-muted">(optionnel)</small></label><input name="ouverture" type="datetime-local" class="form-control" title="Avant cette date, les étudiants ne peuvent pas commencer"><span class="form-text mt-0">Vide = ouvert immédiatement.</span></div>

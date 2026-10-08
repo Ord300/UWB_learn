@@ -17,6 +17,7 @@ $editJour = $editHeure = '';
 if ($edit && preg_match('/^(\d{4}-\d{2}-\d{2})(?: (\d{2}:\d{2}))?/', (string)$edit['seance_date'], $m)) {
     $editJour = $m[1]; $editHeure = $m[2] ?? '';
 }
+$editFin = trim((string)($edit['seance_fin'] ?? ''));
 uwb_head('Mes cours & séances Meet', 'Cours du professeur.');
 uwb_header_nav('cours', nav_prof());
 ?>
@@ -40,7 +41,7 @@ uwb_header_nav('cours', nav_prof());
 <div class="container"><div class="d-flex justify-content-end mb-3" data-aos="fade-up"><button class="btn-uwb" data-bs-toggle="modal" data-bs-target="#coursModal"><i class="bi bi-plus-circle"></i> Ajouter un cours</button></div>
 <div class="panel-pro" data-aos="fade-up"><div class="panel-head"><strong><i class="bi bi-collection"></i> Cours publiés</strong><small><?= count($list) ?> cours</small></div>
 <?php foreach ($list as $c): ?>
-<div class="mini-row"><div style="min-width:0"><strong><?= e($c['titre']) ?></strong><br><small><?= e($c['categorie']) ?> • <?= e($c['faculte'] ?? '—') ?> • <?= e($c['niveau']) ?> • <?= (int)$c['inscrits'] ?> inscrits • <?= e($c['seance_date']) ?></small></div>
+<div class="mini-row"><div style="min-width:0"><strong><?= e($c['titre']) ?></strong><br><small><?= e($c['categorie']) ?> • <?= e($c['faculte'] ?? '—') ?> • <?= e($c['niveau']) ?> • <?= (int)$c['inscrits'] ?> inscrits • <?= e($c['seance_date']) ?><?= trim((string)($c['seance_fin'] ?? '')) !== '' ? ' → ' . e($c['seance_fin']) : '' ?></small></div>
 <div class="mini-actions"><a class="icon-btn ok" target="_blank" href="<?= e($c['meet_link']) ?>"><i class="bi bi-camera-video"></i></a>
 <a class="icon-btn" href="?edit=<?= (int)$c['id'] ?>"><i class="bi bi-pencil"></i></a>
 <a class="icon-btn danger" href="../actions/cours.php?action=delete&id=<?= (int)$c['id'] ?>" onclick="return confirm('Supprimer ce cours ?')"><i class="bi bi-trash"></i></a></div></div>
@@ -53,8 +54,9 @@ uwb_header_nav('cours', nav_prof());
 <div class="col-md-4"><label class="form-label">Catégorie *</label><input name="categorie" class="form-control" value="<?= e($edit['categorie'] ?? 'Informatique') ?>" required></div>
 <div class="col-md-4"><label class="form-label">Faculté *</label><select name="faculte" class="form-control"><?php foreach ($fils as $f): ?><option <?= ($edit['faculte'] ?? 'Informatique')===$f?'selected':'' ?>><?= e($f) ?></option><?php endforeach; ?></select></div>
 <div class="col-md-4"><label class="form-label">Niveau</label><select name="niveau" class="form-control"><?php foreach (['L1','L2','L3','M1','M2','Autre'] as $n): ?><option <?= ($edit['niveau'] ?? 'L3')===$n?'selected':'' ?>><?= $n ?></option><?php endforeach; ?></select></div>
-<div class="col-md-6"><label class="form-label">Date séance</label><input name="seance_jour" type="date" value="<?= e($editJour) ?>" class="form-control"></div>
-<div class="col-md-6"><label class="form-label">Heure séance</label><input name="seance_heure" type="time" value="<?= e($editHeure) ?>" class="form-control"></div>
+<div class="col-md-4"><label class="form-label">Date séance</label><input name="seance_jour" type="date" value="<?= e($editJour) ?>" class="form-control"></div>
+<div class="col-md-4"><label class="form-label">Heure début séance</label><input name="seance_heure" type="time" value="<?= e($editHeure) ?>" class="form-control"></div>
+<div class="col-md-4"><label class="form-label">Heure fin séance</label><input name="seance_fin" type="time" value="<?= e($editFin) ?>" class="form-control" title="Après cette heure, les étudiants ne peuvent plus accéder à la séance"></div>
 <div class="col-md-6"><label class="form-label">Lien Google Meet</label><input name="meet_link" class="form-control" value="<?= e($edit['meet_link'] ?? 'https://meet.google.com/uwb-') ?>"></div>
 <div class="col-md-6"><label class="form-label">Description + supports ( ; )</label><input name="description" class="form-control" value="<?= e($edit && $edit['description'] !== '—' ? $edit['description'] : '') ?>" placeholder="Intro…"><input name="supports" class="form-control mt-2" value="<?= e(implode(' ; ', json_decode($edit['supports'] ?? '[]', true) ?: [])) ?>" placeholder="Support PDF ; TP.zip"></div>
 <div class="col-12 d-flex gap-2"><button class="btn-uwb"><i class="bi bi-<?= $edit ? 'check' : 'send' ?>"></i> <?= $edit ? 'Enregistrer' : 'Publier le cours' ?></button><a class="btn btn-outline-secondary" href="mes-cours.php">Fermer</a></div></form>

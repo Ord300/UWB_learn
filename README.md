@@ -26,8 +26,8 @@ mysql -u root --default-character-set=utf8mb4 < uwb_learn.sql
 > **Inscription** : réservée aux **étudiants** (professeurs/admin créés par l'admin).
 > Chaque étudiant accède aux **cours, bibliothèque et évaluations de sa faculté**
 > (facultés : Médecine, ISTM, Économie, Communication, Droit, Théologie, Informatique, Gestion…).
-> Un **système de notifications** (cloche 🔔) signale les nouveaux cours/évaluations/ressources,
-> les copies validées et les diffusions de l'administration.
+> Un **bouton de notifications** (cloche 🔔 + compteur) est placé **juste à côté du bouton Déconnexion** ;
+> il signale les nouveaux cours/évaluations/ressources, les copies validées et les diffusions de l'administration.
 
 Comptes démo :
 | Rôle | Email | Mot de passe |
@@ -54,4 +54,12 @@ Les anciens `.html` sont conservés ; `.htaccess` redirige `.html → .php`.
 ## 5. Notes
 - Mots de passe hashés (`password_hash`), requêtes préparées PDO.
 - Moteur IA PHP = même algo que `assets/js/script.js` (QCM 100% + mots-clés + note /20).
+- **IA réelle (facultatif)** : collez une clé Groq gratuite dans `config/ia_api.php` → correction par API
+  (sinon moteur IA local inclus). Résultats étudiants affichés **uniquement après validation du professeur**.
+- **Séance caméra (Meet)** : le professeur définit l'**heure de début et l'heure de fin** de la séance
+  (`Mes cours & séances Meet`) ; hors de cette fenêtre, l'étudiant ne peut plus rejoindre la séance (bouton verrouillé).
+- **Évaluation** : le professeur peut fixer une **fenêtre ouverture → clôture** en plus du délai.
+  Avant l'ouverture : « Pas encore ouverte » (impossible de commencer) ; après la clôture : accès fermé.
+  La session démarre au clic de l'étudiant, dure au plus le délai et n'excède **jamais** la clôture ;
+  sortie de page = copie soumise automatiquement (triche, note proposée 0/20 à valider).
 - Uploads : couvertures (2 Mo max, `uploads/cov_*`), PDF (20 Mo max, `uploads/doc_*`).

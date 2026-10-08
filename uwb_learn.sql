@@ -1,6 +1,6 @@
 -- ============================================================
 -- UWB.Learn - Base de donnees MySQL (design inchange, 100% PHP)
--- Facultes (ex-filieres) + notifications
+-- Facultes (ex-filieres) + notifications + sessions d'evaluation
 -- Import : mysql -u root --default-character-set=utf8mb4 < uwb_learn.sql
 -- ============================================================
 CREATE DATABASE IF NOT EXISTS uwb_learn
@@ -40,6 +40,7 @@ CREATE TABLE `cours` (
   `description` text DEFAULT NULL,
   `supports` text DEFAULT NULL COMMENT 'JSON array de strings',
   `seance_date` varchar(32) DEFAULT 'À programmer',
+  `seance_fin` varchar(8) NOT NULL DEFAULT '',
   `meet_link` varchar(255) DEFAULT '',
   `salle` varchar(100) DEFAULT 'Google Meet',
   `inscrits` int(11) DEFAULT 0,
@@ -49,7 +50,7 @@ CREATE TABLE `cours` (
   PRIMARY KEY (`id`),
   KEY `enseignant_id` (`enseignant_id`),
   CONSTRAINT `cours_ibfk_1` FOREIGN KEY (`enseignant_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -58,8 +59,42 @@ CREATE TABLE `cours` (
 
 LOCK TABLES `cours` WRITE;
 /*!40000 ALTER TABLE `cours` DISABLE KEYS */;
-INSERT INTO `cours` VALUES (3,'Comptabilité Générale OHADA',3,'Prof. Aline Nsimba','Gestion','L2','Plan comptable OHADA, journal, grand-livre, balance et états financiers.','[\"Plan OHADA résumé.pdf\"]','2026-10-09 09:00','https://meet.google.com/uwb-ohada-303','Visioconférence Google Meet',55,'forms/portfolio-6.webp','2026-10-04 13:31:40','Informatique'),(5,'Cours d\'Echec',2,'Prof. Mbuyi Kalonji','Informatique','L3','C’est avec une immense joie que nous vous invitons à célébrer notre union et partager ce moment unique rempli d’amour, de bonheur et d’émotions.','[\"Cours d\'echec de marie\"]','2026-10-04 17:50','https://meet.google.com/nym-ankg-swn','Google Meet',0,'forms/portfolio-1.webp','2026-10-04 15:31:30','Informatique');
+INSERT INTO `cours` VALUES (3,'Comptabilité Générale OHADA',3,'Prof. Aline Nsimba','Gestion','L2','Plan comptable OHADA, journal, grand-livre, balance et états financiers.','[\"Plan OHADA résumé.pdf\"]','2026-10-09 09:00','','https://meet.google.com/uwb-ohada-303','Visioconférence Google Meet',55,'forms/portfolio-6.webp','2026-10-04 13:31:40','Informatique'),(5,'Cours d\'Echec',2,'Prof. Mbuyi Kalonji','Informatique','L3','Cours de demonstration de la plateforme (supports a venir).','[]','2026-10-04 17:50','','https://meet.google.com/nym-ankg-swn','Google Meet',0,'forms/portfolio-1.webp','2026-10-04 15:31:30','Informatique');
 /*!40000 ALTER TABLE `cours` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `eval_sessions`
+--
+
+DROP TABLE IF EXISTS `eval_sessions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `eval_sessions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `evaluation_id` int(11) NOT NULL,
+  `etudiant_id` int(11) NOT NULL,
+  `started_at` datetime NOT NULL,
+  `deadline_at` datetime NOT NULL,
+  `ended_at` datetime DEFAULT NULL,
+  `etat` enum('en_cours','soumise','triche','expiree') NOT NULL DEFAULT 'en_cours',
+  `reponses` longtext DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_eval_etud` (`evaluation_id`,`etudiant_id`),
+  KEY `idx_etud` (`etudiant_id`),
+  CONSTRAINT `fk_sess_etud` FOREIGN KEY (`etudiant_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_sess_eval` FOREIGN KEY (`evaluation_id`) REFERENCES `evaluations` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `eval_sessions`
+--
+
+LOCK TABLES `eval_sessions` WRITE;
+/*!40000 ALTER TABLE `eval_sessions` DISABLE KEYS */;
+/*!40000 ALTER TABLE `eval_sessions` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -76,6 +111,8 @@ CREATE TABLE `evaluations` (
   `prof_id` int(11) DEFAULT NULL,
   `prof_nom` varchar(150) DEFAULT '',
   `duree` int(11) DEFAULT 30 COMMENT 'minutes',
+  `ouverture_at` datetime DEFAULT NULL,
+  `cloture_at` datetime DEFAULT NULL,
   `statut` varchar(20) DEFAULT 'publiée',
   `created_at` timestamp NULL DEFAULT current_timestamp(),
   `faculte` varchar(150) NOT NULL DEFAULT 'Informatique',
@@ -85,7 +122,7 @@ CREATE TABLE `evaluations` (
   KEY `prof_id` (`prof_id`),
   CONSTRAINT `evaluations_ibfk_1` FOREIGN KEY (`cours_id`) REFERENCES `cours` (`id`) ON DELETE SET NULL,
   CONSTRAINT `evaluations_ibfk_2` FOREIGN KEY (`prof_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -94,7 +131,7 @@ CREATE TABLE `evaluations` (
 
 LOCK TABLES `evaluations` WRITE;
 /*!40000 ALTER TABLE `evaluations` DISABLE KEYS */;
-INSERT INTO `evaluations` VALUES (3,5,'Quiz echec',2,'Prof. Mbuyi Kalonji',30,'publiée','2026-10-04 16:18:16','Informatique','L3');
+INSERT INTO `evaluations` VALUES (3,5,'Quiz echec',2,'Prof. Mbuyi Kalonji',30,NULL,NULL,'publiée','2026-10-04 16:18:16','Informatique','L3');
 /*!40000 ALTER TABLE `evaluations` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -179,7 +216,7 @@ CREATE TABLE `notifications` (
   PRIMARY KEY (`id`),
   KEY `idx_user_lu` (`user_id`,`lu`),
   CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=112 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -211,7 +248,7 @@ CREATE TABLE `questions` (
   PRIMARY KEY (`id`),
   KEY `idx_questions_evaluation` (`evaluation_id`),
   CONSTRAINT `fk_questions_evaluation` FOREIGN KEY (`evaluation_id`) REFERENCES `evaluations` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -242,7 +279,7 @@ CREATE TABLE `soumissions` (
   `note_finale` int(11) DEFAULT NULL,
   `feedback` text DEFAULT NULL,
   `details` text DEFAULT NULL COMMENT 'JSON details IA',
-  `statut` enum('proposee-IA','validee') DEFAULT 'proposee-IA',
+  `statut` enum('proposee-IA','validee','triche') NOT NULL DEFAULT 'proposee-IA',
   `commentaire_prof` varchar(500) DEFAULT '',
   `date_soumission` date DEFAULT curdate(),
   `created_at` timestamp NULL DEFAULT current_timestamp(),
@@ -252,7 +289,7 @@ CREATE TABLE `soumissions` (
   KEY `idx_email` (`email`),
   CONSTRAINT `soumissions_ibfk_1` FOREIGN KEY (`evaluation_id`) REFERENCES `evaluations` (`id`) ON DELETE CASCADE,
   CONSTRAINT `soumissions_ibfk_2` FOREIGN KEY (`etudiant_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -284,7 +321,7 @@ CREATE TABLE `users` (
   UNIQUE KEY `email` (`email`),
   KEY `idx_role` (`role`),
   KEY `idx_email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -293,7 +330,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'Admin UWB','admin@uwb.ac.cd','$2y$10$LNObgj1pYzMzo59NMURFPexQdLsVgQj4b8EJPFzcHz5wJn60MrPeS','admin','Administration','2026-10-04 13:31:40','L3'),(2,'Prof. Mbuyi Kalonji','prof@uwb.ac.cd','$2y$10$yuM8kvxMw64rv2NKCVP4v.HnNTYZSIolAWV1CH23L.7S8Fq2ChzxO','professeur','Informatique','2026-10-04 13:31:40','L3'),(3,'Prof. Aline Nsimba','aline@uwb.ac.cd','$2y$10$yuM8kvxMw64rv2NKCVP4v.HnNTYZSIolAWV1CH23L.7S8Fq2ChzxO','professeur','Gestion','2026-10-04 13:31:40','L3'),(4,'Grace Lukusa','etudiant@uwb.ac.cd','$2y$10$ghNw64fKtlQGkOxTtt/UkOuEAywlLDlc4d4eM61FCCX3tILj3U8Bm','etudiant','Informatique','2026-10-04 13:31:40','L3'),(5,'Jean Ilunga','jean@uwb.ac.cd','$2y$10$ghNw64fKtlQGkOxTtt/UkOuEAywlLDlc4d4eM61FCCX3tILj3U8Bm','etudiant','Gestion','2026-10-04 13:31:40','L2'),(6,'Ordi','ordidimbi@gmail.com','$2y$10$n.gBnHZIC34odLkmzO6MveD8vCFPdk/Bgj8RwAcTsgdxaEltdX8Ha','etudiant','Informatique','2026-10-04 15:52:03','L3');
+INSERT INTO `users` VALUES (1,'Admin UWB','admin@uwb.ac.cd','$2y$10$LNObgj1pYzMzo59NMURFPexQdLsVgQj4b8EJPFzcHz5wJn60MrPeS','admin','Administration','2026-10-04 13:31:40','L3'),(2,'Prof. Mbuyi Kalonji','prof@uwb.ac.cd','$2y$10$yuM8kvxMw64rv2NKCVP4v.HnNTYZSIolAWV1CH23L.7S8Fq2ChzxO','professeur','Informatique','2026-10-04 13:31:40','L3'),(3,'Prof. Aline Nsimba','aline@uwb.ac.cd','$2y$10$yuM8kvxMw64rv2NKCVP4v.HnNTYZSIolAWV1CH23L.7S8Fq2ChzxO','professeur','Gestion','2026-10-04 13:31:40','L3'),(4,'Grace Lukusa','etudiant@uwb.ac.cd','$2y$10$ghNw64fKtlQGkOxTtt/UkOuEAywlLDlc4d4eM61FCCX3tILj3U8Bm','etudiant','Informatique','2026-10-04 13:31:40','L3'),(5,'Jean Ilunga','jean@uwb.ac.cd','$2y$10$ghNw64fKtlQGkOxTtt/UkOuEAywlLDlc4d4eM61FCCX3tILj3U8Bm','etudiant','Gestion','2026-10-04 13:31:40','L2'),(6,'Ordi','ordidimbi@gmail.com','$2y$10$n.gBnHZIC34odLkmzO6MveD8vCFPdk/Bgj8RwAcTsgdxaEltdX8Ha','etudiant','Informatique','2026-10-04 15:52:03','L3'),(7,'NARUTO UZUMAKI','Naruto@gmail.com','$2y$10$9/a4HEHsZzzWPv07xDRfe.tck3zwjjfes3jRPlNEAYgh30Tj8mhZm','etudiant','Communication','2026-10-08 16:29:34','L1');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -306,4 +343,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed
+-- Dump completed on 2026-10-08 17:44:17

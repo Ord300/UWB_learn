@@ -20,7 +20,7 @@ function uwb_head(string $title, string $desc = ''): void {
 <link href="<?= $b ?>assets/vendor/aos/aos.css" rel="stylesheet">
 <link href="<?= $b ?>assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
 <link href="<?= $b ?>assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
-<style>.notif-link{position:relative}.notif-badge{position:absolute;top:-8px;right:-12px;min-width:18px;height:18px;line-height:18px;padding:0 5px;border-radius:9px;background:#e63946;color:#fff!important;font-size:.68rem;font-weight:700;text-align:center}</style>
+<style>.header-actions{display:flex;align-items:center;gap:10px}.notif-btn{position:relative;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:#fff;color:#253a54;border:1px solid rgba(0,0,0,.1);box-shadow:0 2px 8px rgba(0,0,0,.1);font-size:1.1rem;transition:.3s}.notif-btn:hover,.notif-btn:focus{background:var(--accent-color);color:var(--contrast-color);border-color:transparent}.notif-btn .notif-badge{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;line-height:18px;padding:0 5px;border-radius:9px;background:#e63946;color:#fff!important;font-size:.68rem;font-weight:700;text-align:center}</style>
 </head>
 <body class="index-page">
 <?php
@@ -39,11 +39,13 @@ function uwb_header_nav(string $active = '', array $links = []): void {
 <?php foreach ($links as [$href, $icon, $label, $key]): ?>
 <li><a href="<?= e($href) ?>" class="<?= $active === $key ? 'active' : '' ?>"><i class="bi <?= e($icon) ?>"></i> <?= e($label) ?></a></li>
 <?php endforeach; ?>
-<?php if ($me): ?>
-<li><a href="<?= $b ?>notifications.php" class="notif-link <?= $active === 'notifs' ? 'active' : '' ?>"><i class="bi bi-bell"></i> Notifications<?php if ($nbNotif): ?> <span class="notif-badge"><?= $nbNotif ?></span><?php endif; ?></a></li>
-<?php endif; ?>
 </ul><i class="mobile-nav-toggle d-lg-none bi bi-list"></i></nav>
+<div class="header-actions">
+<?php if ($me): ?>
+<a class="notif-btn" href="<?= $b ?>notifications.php" title="Notifications" aria-label="Notifications"><i class="bi bi-bell"></i><?php if ($nbNotif): ?><span class="notif-badge"><?= $nbNotif ?></span><?php endif; ?></a>
+<?php endif; ?>
 <a class="btn-getstarted" href="<?= $b ?>actions/logout.php">Déconnexion</a>
+</div>
 </div></header>
 <?php
 }
@@ -84,6 +86,13 @@ function uwb_footer(string $note = 'UWB E-learning.'): void {
 // Carte cours — même HTML que uwbCoursCard() JS, design strictement identique
 function uwb_cours_card(array $x, int $i = 0): string {
     $ms = meet_state($x['seance_date'] ?? '');
+    $fs = fenetre_seance($x);
+    $estud = (current_user()['role'] ?? '') === 'etudiant';
+    $rejoindre = !$estud || $fs['etat'] === 'live'; // étudiant : accès à la caméra uniquement dans la fenêtre début→fin
+    $libEtat = ['avant' => 'Séance à venir', 'live' => 'En direct', 'fini' => 'Séance terminée', 'aucune' => 'Séance à programmer'][$fs['etat']];
+    $quand = $fs['etat'] === 'aucune'
+        ? (string)($x['seance_date'] ?: '—')
+        : ($ms ? $ms['jour'] . ' ' . $ms['mois'] . ' • ' : '') . $fs['heure_debut'] . ($fs['heure_fin'] ? ' → ' . $fs['heure_fin'] : '');
     $d = (($i) % 3) * 100;
     $sup = json_decode($x['supports'] ?? '[]', true) ?: [];
     if (!is_array($sup)) $sup = [$sup];
@@ -95,11 +104,15 @@ function uwb_cours_card(array $x, int $i = 0): string {
 <div class="teacher-mini"><span class="avatar-initials xs"><?= e(uwb_initials($x['enseignant_nom'])) ?></span><span><?= e($x['enseignant_nom']) ?></span></div>
 <p class="course-desc"><?= e($x['description']) ?></p>
 <div class="supports-mini"><i class="bi bi-paperclip"></i> <?= $supTxt ?></div>
-<div class="meet-strip <?= ($ms && ($ms['past'] ?? false)) ? 'past' : '' ?>"><span class="dot"></span>
-<div class="flex-fill" style="min-width:0"><small class="text-muted"><?= $ms ? (($ms['past'] ?? false) ? 'Séance terminée' : 'Prochaine séance') : 'Séance à programmer' ?></small><br>
-<strong class="small"><?= $ms ? e($ms['jour'] . ' ' . $ms['mois'] . ' • ' . $ms['heure']) : e($x['seance_date']) ?></strong></div>
+<div class="meet-strip <?= $fs['etat'] === 'fini' ? 'past' : '' ?>"><span class="dot"></span>
+<div class="flex-fill" style="min-width:0"><small class="text-muted"><?= e($libEtat) ?></small><br>
+<strong class="small"><?= e($quand) ?></strong></div>
+<?php if ($rejoindre && $x['meet_link']): ?>
 <a href="<?= e($x['meet_link'] ?: '#') ?>" target="_blank" class="btn-join" title="Rejoindre sur Google Meet"><i class="bi bi-camera-video-fill"></i> Rejoindre</a>
 <button class="btn-copy" title="Copier le lien" onclick="navigator.clipboard&&navigator.clipboard.writeText('<?= e($x['meet_link']) ?>')"><i class="bi bi-link-45deg"></i></button>
+<?php else: ?>
+<span class="btn-join" style="opacity:.55;cursor:not-allowed" title="<?= $estud ? 'Accès à la séance réservé à la fenêtre début → fin' : '' ?>"><i class="bi bi-lock"></i> <?= e($libEtat) ?></span>
+<?php endif; ?>
 </div></div></div></div>
 <?php return ob_get_clean();
 }

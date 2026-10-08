@@ -3,6 +3,7 @@ require_once __DIR__ . '/../includes/layout.php';
 $u = require_login();
 // Migration auto : colonnes ajoutées après la création initiale
 try { if (!db()->query("SHOW COLUMNS FROM cours LIKE 'faculte'")->fetch()) db()->exec("ALTER TABLE cours ADD COLUMN faculte VARCHAR(150) NOT NULL DEFAULT 'Informatique'"); } catch (Throwable $t) {}
+try { if (!db()->query("SHOW COLUMNS FROM cours LIKE 'seance_fin'")->fetch()) db()->exec("ALTER TABLE cours ADD COLUMN seance_fin VARCHAR(8) NOT NULL DEFAULT ''"); } catch (Throwable $t) {}
 try { if (!db()->query("SHOW COLUMNS FROM users LIKE 'niveau'")->fetch()) db()->exec("ALTER TABLE users ADD COLUMN niveau VARCHAR(10) NOT NULL DEFAULT 'L3'"); } catch (Throwable $t) {}
 $q = trim($_GET['q'] ?? ''); $cat = trim($_GET['cat'] ?? '');
 $sql = 'SELECT * FROM cours WHERE 1=1'; $p = [];

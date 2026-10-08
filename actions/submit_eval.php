@@ -1,10 +1,12 @@
 <?php
-// Soumission copie étudiant -> correction IA (même algo que JS) -> statut proposee-IA
+// Soumission de copie (fin de session volontaire) -> correction IA réelle
+// -> statut proposee-IA, en attente de validation du professeur
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/auth.php';
-require_once __DIR__ . '/../includes/ia.php';
+require_once __DIR__ . '/../includes/eval_session.php';
 $u = require_login(['etudiant']);
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') { header('Location: ../etudiant/evaluations.php'); exit; }
+evals_ensure_schema();
 $evalId = (int)($_POST['evaluation_id'] ?? 0);
 $ev = db()->prepare('SELECT * FROM evaluations WHERE id=?'); $ev->execute([$evalId]); $eval = $ev->fetch();
 if (!$eval) { flash('Sujet introuvable.'); header('Location: ../etudiant/evaluations.php'); exit; }
@@ -20,21 +22,24 @@ try {
 $chk = db()->prepare('SELECT id FROM soumissions WHERE evaluation_id=? AND etudiant_id=? LIMIT 1');
 $chk->execute([$evalId, $u['id']]);
 if ($chk->fetch()) { flash('Copie déjà soumise pour ce sujet.'); header('Location: ../etudiant/resultats.php'); exit; }
-
-$q = db()->prepare('SELECT * FROM questions WHERE evaluation_id=? ORDER BY id');
-$q->execute([$evalId]); $questions = $q->fetchAll();
+// Session obligatoire : démarée depuis la page d'évaluation
+$sess = eval_session_get($evalId, (int)$u['id']);
+if (!$sess || $sess['etat'] !== 'en_cours') {
+    flash('Session non démarrée : cliquez d’abord sur « Commencer l’évaluation ».');
+    header('Location: ../etudiant/evaluations.php?eval=' . $evalId);
+    exit;
+}
+// Réponses
+$questions = db()->prepare('SELECT * FROM questions WHERE evaluation_id=? ORDER BY id');
+$questions->execute([$evalId]); $questions = $questions->fetchAll();
 $reponses = [];
 foreach ($questions as $qq) $reponses[$qq['qkey']] = trim((string)($_POST[$qq['qkey']] ?? ''));
-// adapte au format ia_corriger
-$qs = array_map(fn($r) => ['qkey'=>$r['qkey'],'type'=>$r['type'],'bonne'=>$r['bonne'],'mots_cles'=>$r['mots_cles'],'points'=>(int)$r['points']], $questions);
-$res = ia_corriger($qs, $reponses);
-$ins = db()->prepare("INSERT INTO soumissions (evaluation_id,etudiant_id,etudiant_nom,email,reponses,note_ia,note_finale,feedback,details,statut) VALUES (?,?,?,?,?,?,?,?,?,'proposee-IA')");
-$ins->execute([$evalId, $u['id'], $u['nom'], $u['email'], json_encode($reponses, JSON_UNESCAPED_UNICODE), $res['noteIA'], null, $res['feedback'], json_encode($res['details'], JSON_UNESCAPED_UNICODE)]);
-// Notification : professeur concerné
-if (!empty($eval['prof_id'])) {
-    require_once __DIR__ . '/../includes/notifications.php';
-    notifier((int)$eval['prof_id'], 'Nouvelle copie soumise', $u['nom'] . ' a soumis « ' . $eval['titre'] . ' » — note IA proposée : ' . $res['noteIA'] . '/20.', 'prof/validation-ia.php');
-}
-flash('Soumission envoyée ! IA propose : ' . $res['noteIA'] . '/20. En attente du professeur.', 'success');
+// Fin de délai (comparaison SQL : même horloge que MySQL) : tolérance 60 s
+$late = db()->prepare('SELECT deadline_at < DATE_SUB(NOW(), INTERVAL 60 SECOND) AS late FROM eval_sessions WHERE id=?');
+$late->execute([(int)$sess['id']]);
+$isLate = (int)($late->fetch()['late'] ?? 0) === 1;
+$type = $isLate ? 'expiree' : 'soumise';
+eval_session_finaliser($sess, $type, $reponses, $isLate ? 'Soumission au-delà du délai autorisé' : '');
+flash('Copie reçue ! En attente de la validation du professeur — vous serez notifié(e) de votre note dans Résultats.', 'success');
 header('Location: ../etudiant/resultats.php');
 exit;

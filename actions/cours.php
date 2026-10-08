@@ -31,6 +31,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     elseif (preg_match('/^\d{4}-\d{2}-\d{2}$/', $jour)) $date = $jour . (preg_match('/^\d{2}:\d{2}$/', $heure) ? ' ' . $heure : '');
     else $date = 'À programmer';
     $meet = trim($_POST['meet_link'] ?? '');
+    $seanceFin = trim($_POST['seance_fin'] ?? '');
+    if (!preg_match('/^\d{2}:\d{2}$/', $seanceFin)) $seanceFin = '';
     $desc = trim($_POST['description'] ?? '—');
     $supRaw = trim($_POST['supports'] ?? '');
     $supports = json_encode(array_values(array_filter(array_map('trim', explode(';', $supRaw)))), JSON_UNESCAPED_UNICODE);
@@ -38,20 +40,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Migration auto : colonne faculte si base créée avant son ajout
     $hasFil = db()->query("SHOW COLUMNS FROM cours LIKE 'faculte'")->fetch();
     if (!$hasFil) db()->exec("ALTER TABLE cours ADD COLUMN faculte VARCHAR(150) NOT NULL DEFAULT 'Informatique'");
+    $hasFin = db()->query("SHOW COLUMNS FROM cours LIKE 'seance_fin'")->fetch();
+    if (!$hasFin) db()->exec("ALTER TABLE cours ADD COLUMN seance_fin VARCHAR(8) NOT NULL DEFAULT ''");
     $fil = trim($_POST['faculte'] ?? ($_POST['filiere'] ?? 'Informatique')) ?: 'Informatique';
     $id = (int)($_POST['id'] ?? 0);
     if ($id > 0) {
         $chk = db()->prepare('SELECT enseignant_nom FROM cours WHERE id=?'); $chk->execute([$id]); $c = $chk->fetch();
         if (!$c || ($u['role'] !== 'admin' && $c['enseignant_nom'] !== $u['nom'])) { flash('Modification refusée.'); header('Location: ../prof/mes-cours.php'); exit; }
-        db()->prepare('UPDATE cours SET titre=?,categorie=?,faculte=?,niveau=?,description=?,supports=?,seance_date=?,meet_link=? WHERE id=?')
-          ->execute([$titre,$cat,$fil,$niv,$desc,$supports,$date,$meet,$id]);
+        db()->prepare('UPDATE cours SET titre=?,categorie=?,faculte=?,niveau=?,description=?,supports=?,seance_date=?,seance_fin=?,meet_link=? WHERE id=?')
+          ->execute([$titre,$cat,$fil,$niv,$desc,$supports,$date,$seanceFin,$meet,$id]);
         flash('Cours mis à jour.', 'success');
         header('Location: ../prof/mes-cours.php'); exit;
     }
     $ensId = $u['role'] === 'admin' ? null : (int)$u['id'];
     $ensNom = $u['role'] === 'admin' ? 'UWB' : $u['nom'];
-    $ins = db()->prepare('INSERT INTO cours (titre,enseignant_id,enseignant_nom,categorie,faculte,niveau,description,supports,seance_date,meet_link,salle,inscrits,image) VALUES (?,?,?,?,?,?,?,?,?,?,?,0,?)');
-    $ins->execute([$titre,$ensId,$ensNom,$cat,$fil,$niv,$desc,$supports,$date,$meet,'Google Meet','forms/portfolio-1.webp']);
+    $ins = db()->prepare('INSERT INTO cours (titre,enseignant_id,enseignant_nom,categorie,faculte,niveau,description,supports,seance_date,seance_fin,meet_link,salle,inscrits,image) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,0,?)');
+    $ins->execute([$titre,$ensId,$ensNom,$cat,$fil,$niv,$desc,$supports,$date,$seanceFin,$meet,'Google Meet','forms/portfolio-1.webp']);
     // Notification : étudiants de la faculté concernée (« — » = toutes)
     require_once __DIR__ . '/../includes/notifications.php';
     notifier_groupe('Nouveau cours publié', $titre . ' — ' . $ensNom . ' • faculté : ' . $fil . ' • niveau ' . $niv . '.', 'etudiant/cours.php', 'etudiant', $fil);

@@ -1,4 +1,6 @@
 <?php
+ini_set('display_errors', '1');
+error_reporting(E_ALL);
 // ============================================================
 // UWB.Learn — Configuration base de données (PDO MySQL)
 // Sur Railway : variables MYSQL* ; en local : valeurs par défaut

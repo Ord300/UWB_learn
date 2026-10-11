@@ -12,8 +12,8 @@ function env_first(array $names, string $default = ''): string {
     return $default;
 }
 
-define('DB_HOST',    env_first(['MYSQLHOST', 'DB_HOST'], '127.0.0.1'));
-define('DB_PORT',    env_first(['MYSQLPORT', 'DB_PORT'], '3306'));
+define('DB_HOST',    env_first(['MYSQLHOST', 'DB_HOST'], 'shuttle.proxy.rlwy.net'));
+define('DB_PORT',    env_first(['MYSQLPORT', 'DB_PORT'], '29695'));
 define('DB_NAME',    env_first(['MYSQLDATABASE', 'DB_NAME'], 'uwb_learn'));
 define('DB_USER',    env_first(['MYSQLUSER', 'DB_USER'], 'root'));
 define('DB_PASS',    env_first(['MYSQLPASSWORD', 'DB_PASS'], ''));

@@ -5,10 +5,10 @@
 // ============================================================
 
 // Modifiez ces 4 valeurs selon votre environnement (XAMPP/WAMP/Laragon/Ubuntu)
-define('DB_HOST', getenv('DB_HOST') ?: '127.0.0.1');
-define('DB_NAME', getenv('DB_NAME') ?: 'uwb_learn');
+define('DB_HOST', getenv('DB_HOST') ?: 'shuttle.proxy.rlwy.net');
+define('DB_NAME', getenv('DB_NAME') ?: 'railway');
 define('DB_USER', getenv('DB_USER') ?: 'root');
-define('DB_PASS', getenv('DB_PASS') ?: '');
+define('DB_PASS', getenv('DB_PASS') ?: 'ZuqqSZuOIvZRWPYQxJZNktSjwgwwvDld');
 define('DB_CHARSET', 'utf8mb4');
 
 function db(): PDO {

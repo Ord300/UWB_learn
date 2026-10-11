@@ -38,7 +38,7 @@ function db(): PDO {
         // Détail technique dans les logs Railway, pas à l'écran
         error_log('DB error: ' . $e->getMessage() . ' | host=' . DB_HOST . ' port=' . DB_PORT);
         http_response_code(500);
-        die('Erreur : ' . htmlspecialchars($e->getMessage()) . ' | host=' . DB_HOST . ' port=' . DB_PORT . ' db=' . DB_NAME . ' user=' . DB_USER);
+       die('Base de données inaccessible. Réessayez dans quelques instants.');
     }
 }
 

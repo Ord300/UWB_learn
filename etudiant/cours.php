@@ -4,6 +4,7 @@ $u = require_login();
 // Migration auto : colonnes ajoutées après la création initiale
 try { if (!db()->query("SHOW COLUMNS FROM cours LIKE 'faculte'")->fetch()) db()->exec("ALTER TABLE cours ADD COLUMN faculte VARCHAR(150) NOT NULL DEFAULT 'Informatique'"); } catch (Throwable $t) {}
 try { if (!db()->query("SHOW COLUMNS FROM cours LIKE 'seance_fin'")->fetch()) db()->exec("ALTER TABLE cours ADD COLUMN seance_fin VARCHAR(8) NOT NULL DEFAULT ''"); } catch (Throwable $t) {}
+try { if (!db()->query("SHOW COLUMNS FROM cours LIKE 'enregistrement'")->fetch()) db()->exec("ALTER TABLE cours ADD COLUMN enregistrement VARCHAR(512) NOT NULL DEFAULT ''"); } catch (Throwable $t) {}
 try { if (!db()->query("SHOW COLUMNS FROM users LIKE 'niveau'")->fetch()) db()->exec("ALTER TABLE users ADD COLUMN niveau VARCHAR(10) NOT NULL DEFAULT 'L3'"); } catch (Throwable $t) {}
 $q = trim($_GET['q'] ?? ''); $cat = trim($_GET['cat'] ?? '');
 $sql = 'SELECT * FROM cours WHERE 1=1'; $p = [];
@@ -21,6 +22,8 @@ if ($u['role'] === 'etudiant') {
 }
 $sql .= ' ORDER BY id';
 $st = db()->prepare($sql); $st->execute($p); $list = $st->fetchAll();
+$cats = ['Informatique','Gestion','Méthodologie'];
+try { foreach (db()->query("SELECT DISTINCT categorie FROM cours WHERE categorie<>'' ORDER BY categorie")->fetchAll() as $r) { if (!in_array($r['categorie'], $cats, true)) $cats[] = $r['categorie']; } } catch (Throwable $t) {}
 uwb_head('Cours & Meet', 'Catalogue des cours UWB.');
 uwb_header_nav('cours', $u['role'] === 'professeur' ? nav_prof() : ($u['role'] === 'admin' ? nav_admin() : nav_etudiant()));
 ?>
@@ -39,7 +42,7 @@ uwb_header_nav('cours', $u['role'] === 'professeur' ? nav_prof() : ($u['role'] =
 <div class="pro-row">
 <div class="pro-input"><i class="bi bi-search"></i><input name="q" value="<?= e($q) ?>" placeholder="Ex : web, SQL, comptabilité, IA…" aria-label="Rechercher un cours"><button type="submit" class="pro-clear" title="Rechercher"><i class="bi bi-search"></i></button></div>
 <div class="select-uwb pro-select"><i class="bi bi-funnel"></i><select name="cat" onchange="this.form.submit()"><option value="">Toutes catégories</option>
-<?php foreach (['Informatique','Gestion','Méthodologie'] as $c): ?><option <?= $cat===$c?'selected':'' ?>><?= e($c) ?></option><?php endforeach; ?></select></div>
+<?php foreach ($cats as $c): ?><option <?= $cat===$c?'selected':'' ?>><?= e($c) ?></option><?php endforeach; ?></select></div>
 </div>
 <div class="pro-row pro-tags"><span>Recherches fréquentes :</span>
 <a class="pro-tag text-decoration-none" href="?q=web">web</a><a class="pro-tag text-decoration-none" href="?q=sql">sql</a><a class="pro-tag text-decoration-none" href="?q=comptabilité">comptabilité</a><a class="pro-tag text-decoration-none" href="?q=ia">intelligence artificielle</a></div>
@@ -49,7 +52,8 @@ uwb_header_nav('cours', $u['role'] === 'professeur' ? nav_prof() : ($u['role'] =
 <div class="panel-pro" data-aos="fade-up"><div class="panel-head"><strong><i class="bi bi-collection"></i> Cours publiés</strong><small><?= count($list) ?> cours</small></div>
 <?php foreach ($list as $x): ?>
 <div class="mini-row"><div style="min-width:0;flex:1"><strong><?= e($x['titre']) ?></strong><br><small><?= e($x['categorie']) ?> • <?= e($x['faculte'] ?? '—') ?> • <?= e($x['niveau']) ?> • <?= (int)$x['inscrits'] ?> inscrits • <?= e($x['seance_date']) ?></small></div>
-<div class="mini-actions"><a class="icon-btn ok" target="_blank" href="<?= e($x['meet_link']) ?>"><i class="bi bi-camera-video"></i></a>
+<div class="mini-actions"><?php $fsx = fenetre_seance($x); ?><?php if ($x['meet_link'] && $fsx['etat'] !== 'fini'): ?><a class="icon-btn ok" target="_blank" href="<?= e(uwb_link($x['meet_link'])) ?>" title="Rejoindre sur Google Meet"><i class="bi bi-camera-video"></i></a><?php else: ?><span class="icon-btn" style="opacity:.55;cursor:not-allowed" title="Séance terminée — accès fermé"><i class="bi bi-lock"></i></span><?php endif; ?>
+<?php if (trim((string)($x['enregistrement'] ?? '')) !== ''): ?><a class="icon-btn replay" target="_blank" href="<?= e(uwb_link($x['enregistrement'])) ?>" title="Revoir l'enregistrement de la séance"><i class="bi bi-play-circle"></i></a><?php endif; ?>
 <a class="icon-btn danger" href="../actions/cours.php?action=delete&id=<?= (int)$x['id'] ?>" onclick="return confirm('Supprimer ce cours ?')"><i class="bi bi-trash"></i></a></div></div>
 <?php endforeach; ?></div>
 <?php else: ?>

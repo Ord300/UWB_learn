@@ -1,13 +1,15 @@
 <?php
 require_once __DIR__ . '/../includes/layout.php';
 require_once __DIR__ . '/../includes/eval_session.php';
-$u = require_login(['professeur']);
+$u = require_login(['professeur','admin']);
 $flash = flash();
 evals_ensure_schema();
 evals_finaliser_expirees(); // clôture les sessions dont le délai est écoulé
 $fNom = trim($_GET['nom'] ?? ''); $fEval = (int)($_GET['eval'] ?? 0); $fDate = trim($_GET['date'] ?? '');
-$sql = 'SELECT s.*, e.titre AS eval_titre FROM soumissions s JOIN evaluations e ON e.id=s.evaluation_id WHERE e.prof_nom=?';
-$p = [$u['nom']];
+$fac = $u['role'] === 'admin' ? '' : my_faculte();
+$sql = 'SELECT s.*, e.titre AS eval_titre FROM soumissions s JOIN evaluations e ON e.id=s.evaluation_id WHERE 1=1';
+$p = [];
+if ($u['role'] !== 'admin') { $sql .= ' AND e.prof_nom=?'; $p[] = $u['nom']; if ($fac !== '') { $sql .= " AND (e.faculte=? OR e.faculte IN ('—',''))"; $p[] = $fac; } }
 if ($fNom !== '') { $sql .= ' AND s.etudiant_nom LIKE ?'; $p[] = "%$fNom%"; }
 if ($fEval) { $sql .= ' AND s.evaluation_id=?'; $p[] = $fEval; }
 if ($fDate !== '') { $sql .= ' AND s.date_soumission=?'; $p[] = $fDate; }
@@ -15,7 +17,12 @@ $sql .= ' ORDER BY s.id DESC';
 $st = db()->prepare($sql); $st->execute($p); $rows = $st->fetchAll();
 $att = array_filter($rows, fn($x) => $x['statut'] !== 'validee');
 $done = array_filter($rows, fn($x) => $x['statut'] === 'validee');
-$myEvals = db()->prepare('SELECT * FROM evaluations WHERE prof_nom=?'); $myEvals->execute([$u['nom']]); $myEvals = $myEvals->fetchAll();
+if ($u['role'] === 'admin') $myEvals = db()->query('SELECT * FROM evaluations ORDER BY id DESC')->fetchAll();
+else {
+    $sql2 = 'SELECT * FROM evaluations WHERE prof_nom=?'; $p2 = [$u['nom']];
+    if ($fac !== '') { $sql2 .= " AND (faculte=? OR faculte IN ('—',''))"; $p2[] = $fac; }
+    $st2 = db()->prepare($sql2 . ' ORDER BY id DESC'); $st2->execute($p2); $myEvals = $st2->fetchAll();
+}
 uwb_head('File de validation IA', 'Validation copies.');
 uwb_header_nav('valid', nav_prof());
 ?>
@@ -61,6 +68,20 @@ uwb_header_nav('valid', nav_prof());
 <?php foreach (array_reverse($done) as $x): ?>
 <div class="mini-row" style="flex-wrap:wrap"><div style="min-width:0;flex:1"><strong><?= e($x['etudiant_nom']) ?></strong><br><small><?= e($x['eval_titre']) ?> • <?= e($x['date_soumission']) ?> • Finale : <?= (int)$x['note_finale'] ?>/20 (IA : <?= (int)$x['note_ia'] ?>)</small></div></div>
 <?php endforeach; if (!count($done)): ?><p class="text-muted small mb-0">Aucune copie validée.</p><?php endif; ?>
+</div></div></section>
+<section class="portfolio section light-background"><div class="container"><div class="panel-pro" data-aos="fade-up"><div class="panel-head"><strong><i class="bi bi-shield-lock"></i> Journal anti-triche (audit)</strong><small>Derniers incidents enregistrés</small></div>
+<?php
+$evtSql = 'SELECT ee.*, u.nom AS etu_nom, ev.titre AS eval_titre FROM eval_events ee JOIN evaluations ev ON ev.id=ee.evaluation_id LEFT JOIN users u ON u.id=ee.etudiant_id WHERE 1=1';
+$ep = [];
+if ($u['role'] !== 'admin') { $evtSql .= ' AND ev.prof_nom=?'; $ep[] = $u['nom']; if ($fac !== '') { $evtSql .= " AND (ev.faculte=? OR ev.faculte IN ('—',''))"; $ep[] = $fac; } }
+$evtSql .= ' ORDER BY ee.id DESC LIMIT 100';
+$events = [];
+try { $st3 = db()->prepare($evtSql); $st3->execute($ep); $events = $st3->fetchAll(); } catch (Throwable $t) {}
+$libs = ['perte_focus' => 'Changement de fenêtre / onglet', 'copie' => 'Copie bloquée', 'couper' => 'Coupe bloquée', 'coller' => 'Collage bloqué', 'clic_droit' => 'Clic droit', 'touche_interdite' => 'Raccourci développeur bloqué', 'plein_ecran_sortie' => 'Sortie du plein écran'];
+foreach ($events as $ev3): ?>
+<div class="mini-row"><div style="min-width:0"><strong><?= e($ev3['etu_nom'] ?? '—') ?></strong> <span class="text-muted">— <?= e($ev3['eval_titre']) ?></span><br>
+<small><span class="badge-ia" style="background:#fee2e2;color:#b91c1c"><?= e($libs[$ev3['type']] ?? $ev3['type']) ?></span> <?= e($ev3['details'] ?? '') ?> • <?= e($ev3['created_at']) ?></small></div></div>
+<?php endforeach; if (!count($events)): ?><p class="text-muted small mb-0">Aucun incident enregistré.</p><?php endif; ?>
 </div></div></section>
 </main>
 <?php uwb_footer('UWB E-learning — Validation IA.'); ?>

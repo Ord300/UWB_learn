@@ -24,7 +24,7 @@
   --background-color: #f1f5f9; /* Background color for the entire website, including individual sections */
   --default-color: #475569; /* Default color used for the majority of the text content across the entire website */
   --heading-color: #1e293b; /* Color for headings, subheadings and title throughout the website */
-  --accent-color: #0ea5e9; /* Accent color that represents your brand on the website. It's used for buttons, links, and other elements that need to stand out */
+  --accent-color: #0a2a6b; /* Accent color that represents your brand on the website. It's used for buttons, links, and other elements that need to stand out */
   --surface-color: #ffffff; /* The surface color is used as a background of boxed elements within sections, such as cards, icon boxes, or other elements that require a visual separation from the global background. */
   --contrast-color: #ffffff; /* Contrast color for text, ensuring readability against backgrounds of accent, heading, or default colors. */
 }
@@ -32,11 +32,11 @@
 /* Nav Menu Colors - The following color variables are used specifically for the navigation menu. They are separate from the global colors to allow for more customization options */
 :root {
   --nav-color: #475569;  /* The default color of the main navmenu links */
-  --nav-hover-color: #0ea5e9; /* Applied to main navmenu links when they are hovered over or active */
+  --nav-hover-color: #0a2a6b; /* Applied to main navmenu links when they are hovered over or active */
   --nav-mobile-background-color: #ffffff; /* Used as the background color for mobile navigation menu */
   --nav-dropdown-background-color: #ffffff; /* Used as the background color for dropdown items that appear when hovering over primary navigation items */
   --nav-dropdown-color: #475569; /* Used for navigation links of the dropdown items in the navigation menu. */
-  --nav-dropdown-hover-color: #0ea5e9; /* Similar to --nav-hover-color, this color is applied to dropdown navigation links when they are hovered over. */
+  --nav-dropdown-hover-color: #0a2a6b; /* Similar to --nav-hover-color, this color is applied to dropdown navigation links when they are hovered over. */
 }
 
 /* Color Presets - These classes override global colors when applied to any section or element, providing reuse of the sam color scheme. */
@@ -6403,8 +6403,9 @@ section,
 /* ===== uwb.css ===== */
 /* Surcouche UWB — conserve Orbit, ajoute dashboard / IA / bibliothèque */
 :root{
-  --uwb-primary:#0a2a6b;
-  --uwb-accent:#f2a900;
+  --uwb-primary:#0a2a6b;   /* Bleu foncé — boutons et actions principales */
+  --uwb-red:#e31e24;       /* Rouge officiel UWB (uwbcongo.org) */
+  --uwb-accent:#ffc107;    /* Jaune officiel UWB (uwbcongo.org) */
   --uwb-ia:#7c3aed;
 }
 .uwb-topbar{background:var(--uwb-primary);color:#fff;font-size:.85rem}
@@ -6412,7 +6413,9 @@ section,
 .sitename-uwb{font-weight:800}
 .sitename-uwb span{color:var(--uwb-accent)}
 /* Logo UWB — écrase la limite 36px du template Orbit */
-.header .logo img{max-height:52px !important;height:52px !important;width:auto;border-radius:8px;margin-right:0}
+.header .logo img{max-height:110px !important;height:110px !important;width:auto;border-radius:8px;margin-right:0}
+/* Logo UWB — même taille sur toutes les pages */
+.header a.logo-uwb img{max-height:110px !important;height:110px !important;width:auto}
 .btn-uwb{background:var(--uwb-primary);color:#fff;border-radius:50px;padding:.6rem 1.4rem;border:0;font-weight:600}
 .btn-uwb:hover{background:#123a8f;color:#fff}
 .btn-uwb-gold{background:var(--uwb-accent);color:#1a1a1a;border-radius:50px;padding:.6rem 1.4rem;border:0;font-weight:700}
@@ -6508,7 +6511,7 @@ pre.ia-feedback{white-space:pre-wrap;background:#fff;border-radius:12px;padding:
 .date-block .h{font-size:.75rem;font-weight:700;color:#0a2a6b}
 .live-dot{width:9px;height:9px;border-radius:50%;background:#dc2626;display:inline-block;margin-right:.3rem;animation:blink 1.2s infinite}
 @keyframes blink{50%{opacity:.2}}
-.btn-meet{display:inline-flex;align-items:center;gap:.45rem;background:linear-gradient(135deg,#059669,#34d399);color:#fff;font-weight:700;border:0;border-radius:50px;padding:.55rem 1.25rem;text-decoration:none;transition:.2s;white-space:nowrap}
+.btn-meet{display:inline-flex;align-items:center;gap:.45rem;background:linear-gradient(135deg,var(--uwb-primary),#2b5cb8);color:#fff;font-weight:700;border:0;border-radius:50px;padding:.55rem 1.25rem;text-decoration:none;transition:.2s;white-space:nowrap}
 .btn-meet:hover{color:#fff;filter:brightness(1.08);transform:scale(1.03)}
 .btn-copy{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;border:1.5px solid #dbe4ff;background:#fff;color:#0a2a6b;transition:.2s}
 .btn-copy:hover{border-color:#0a2a6b;background:#eef2ff}
@@ -6607,6 +6610,10 @@ pre.ia-feedback{white-space:pre-wrap;background:#fff;border-radius:12px;padding:
 .icon-btn.danger:hover{background:#dc2626;border-color:#dc2626;color:#fff}
 .icon-btn.ok{color:#059669;border-color:#b9e4cd}
 .icon-btn.ok:hover{background:#059669;border-color:#059669;color:#fff}
+.icon-btn.replay{color:#c97800;border-color:#f5d8a6}
+.icon-btn.replay:hover{background:var(--uwb-accent);border-color:var(--uwb-accent);color:#1a1a1a}
+.btn-enreg{display:inline-flex;align-items:center;gap:.35rem;border:1px solid #f5d8a6;background:#fff7e6;color:#a15c00;border-radius:50px;padding:.3rem .85rem;font-size:.78rem;font-weight:700;cursor:pointer;transition:.15s;white-space:nowrap}
+.btn-enreg:hover{background:var(--uwb-accent);border-color:var(--uwb-accent);color:#1a1a1a}
 /* Formulaire ultra-minimaliste */
 .form-min .form-control,.form-min select.form-control{border:0;border-bottom:1.5px solid #e2e7f0;border-radius:0;padding:.55rem .1rem;background:transparent;font-size:.93rem;color:#101c33}
 .form-min .form-control:focus,.form-min select.form-control:focus{border-color:#0a2a6b;box-shadow:none;background:transparent;outline:0}
@@ -6640,8 +6647,10 @@ pre.ia-feedback{white-space:pre-wrap;background:#fff;border-radius:12px;padding:
 .meet-strip.past{background:#f7f8fa}
 .meet-strip .dot{width:9px;height:9px;border-radius:50%;background:#059669;flex-shrink:0}
 .meet-strip.past .dot{background:#c3ccd9}
-.btn-join{background:#059669;color:#fff;font-weight:700;font-size:.82rem;border:0;border-radius:50px;padding:.48rem 1.15rem;text-decoration:none;white-space:nowrap;transition:.2s}
-.btn-join:hover{color:#fff;filter:brightness(1.07)}
+.btn-join{background:var(--uwb-primary);color:#fff;font-weight:700;font-size:.82rem;border:0;border-radius:50px;padding:.48rem 1.15rem;text-decoration:none;white-space:nowrap;transition:.2s}
+.btn-join:hover{color:#fff;background:#123a8f}
+.btn-join.replay{background:var(--uwb-accent);color:#1a1a1a}
+.btn-join.replay:hover{background:#d39e00;color:#1a1a1a}
 /* Parcours minimaliste */
 .parc-card{background:#fff;border:1px solid #e5e9f2;border-radius:14px;padding:1.1rem 1.2rem}
 .parc-head{display:flex;justify-content:space-between;align-items:center;padding-bottom:.7rem;margin-bottom:.4rem;border-bottom:1px solid #eef1f6}
@@ -6770,7 +6779,7 @@ a.parc-row:hover .parc-go{color:#0a2a6b}
 @media(max-width:992px){.svc-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:576px){.svc-grid{grid-template-columns:1fr}}
 .svc-card{background:#fff;border:1px solid #e9eefb;border-radius:20px;padding:1.25rem;transition:.25s;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:.55rem}
-.svc-card::after{content:'';position:absolute;left:0;right:0;bottom:0;height:4px;background:linear-gradient(90deg,#0a2a6b,#7c3aed,#f2a900);opacity:0;transition:.25s}
+.svc-card::after{content:'';position:absolute;left:0;right:0;bottom:0;height:4px;background:linear-gradient(90deg,#0a2a6b,#e31e24,#ffc107);opacity:0;transition:.25s}
 .svc-card:hover{transform:translateY(-5px);box-shadow:0 20px 44px rgba(10,42,107,.14)}
 .svc-card:hover::after{opacity:1}
 .svc-top{display:flex;align-items:center;justify-content:space-between}
@@ -6797,19 +6806,21 @@ a.parc-row:hover .parc-go{color:#0a2a6b}
 .btn-simple:hover{border-color:#0a2a6b;background:#eef2ff;color:#0a2a6b}
 .btn-simple.primary{background:#0a2a6b;border-color:#0a2a6b;color:#fff}
 .btn-simple.primary:hover{background:#123a8f;border-color:#123a8f;color:#fff}
+.btn-simple.gold{background:var(--uwb-accent);border-color:var(--uwb-accent);color:#1a1a1a;font-weight:700}
+.btn-simple.gold:hover{background:#d39e00;border-color:#d39e00;color:#1a1a1a}
 /* Modules minimalistes */
 .mod-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 @media(max-width:992px){.mod-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:576px){.mod-grid{grid-template-columns:1fr}}
 .mod-card{background:#fff;border:1px solid #e9eefb;border-radius:18px;padding:1.2rem;position:relative;overflow:hidden;transition:.25s;display:flex;flex-direction:column;gap:.5rem}
-.mod-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#0a2a6b,#7c3aed)}
+.mod-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#0a2a6b,#e31e24,#ffc107)}
 .mod-card:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(10,42,107,.12)}
 .mod-top{display:flex;align-items:center;gap:.7rem}
 .mod-num{width:34px;height:34px;border-radius:50%;background:#0a2a6b;color:#fff;font-weight:800;display:inline-flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0}
 .mod-card h3{margin:0;font-size:1.02rem;color:#0a2a6b}
 .mod-card p{color:#5b6b8c;font-size:.9rem;margin:0;flex:1}
 .mod-link{display:inline-flex;align-items:center;gap:.4rem;font-weight:700;font-size:.88rem;color:#0a2a6b;text-decoration:none}
-.mod-link:hover{color:#7c3aed}
+.mod-link:hover{color:var(--uwb-red)}
 /* ===== UWB — Liens du header (desktop) : pastilles avec icônes ===== */
 @media (min-width: 992px) {
   /* Nav centrée (logo à gauche, bouton à droite) */
@@ -6837,3 +6848,46 @@ a.btn-getstarted,a.btn-simple,a.btn-uwb,a.btn-uwb-gold{text-decoration:none !imp
 /* ===== UWB — Liens d'authentification (Créer un compte / Se connecter) sans soulignement ===== */
 .auth-link,.auth-link:hover,.auth-link:focus,.auth-link:active{text-decoration:none !important;color:#0a2a6b}
 .auth-link:hover strong{color:#1e4fb0}
+/* ===== Footer UWB — fond rouge officiel (#e31e24) ===== */
+.footer{background:var(--uwb-red);color:#fff}
+.footer h4,.footer .footer-info .logo span{color:#fff}
+.footer .footer-info p,.footer .footer-links ul li,.footer .copyright p,.footer .credits{color:rgba(255,255,255,.92)}
+.footer .footer-links ul a{color:#fff}
+.footer .footer-links ul a:hover{color:var(--uwb-accent)}
+.footer .footer-top{border-bottom-color:rgba(255,255,255,.18)}
+.footer h4:after{background:var(--uwb-accent)}
+.footer .social-links a{background:rgba(255,255,255,.18);color:#fff}
+.footer .social-links a:hover{background:var(--uwb-accent);color:#1a1a1a}
+.footer .footer-newsletter form input[type=email]{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.3);color:#fff}
+.footer .footer-newsletter form input[type=email]::placeholder{color:rgba(255,255,255,.72)}
+.footer .btn-subscribe{background:var(--uwb-accent);border-color:var(--uwb-accent);color:#1a1a1a}
+
+/* ===== Anti-triche évaluation : plein écran + validation ===== */
+.fs-overlay{position:fixed;inset:0;z-index:99999;background:rgba(10,42,107,.94);display:flex;align-items:center;justify-content:center;padding:1.2rem;backdrop-filter:blur(3px)}
+.fs-box{background:#fff;border-radius:20px;padding:2rem;max-width:520px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.35)}
+.fs-box h4{color:#0a2a6b;font-weight:800;margin-bottom:.6rem}
+.fs-box p{color:#5b6b8c;font-size:.95rem}
+.fs-box .btn-uwb-gold{margin-top:.6rem}
+.exam-qcard.q-missing{border-color:#dc2626;box-shadow:0 0 0 3px rgba(220,38,38,.18);animation:qshake .4s}
+@keyframes qshake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+/* ===== Chatbot IA UWB.Learn ===== */
+.uwb-chat{position:fixed;right:20px;bottom:20px;z-index:9998;font-family:inherit}
+.uwb-chat-btn{width:60px;height:60px;border-radius:50%;border:0;background:linear-gradient(135deg,#0a2a6b,#7c3aed);color:#fff;font-size:1.6rem;box-shadow:0 12px 30px rgba(10,42,107,.35);cursor:pointer;position:relative;transition:.25s}
+.uwb-chat-btn:hover{transform:scale(1.06)}
+.uwb-chat-dot{position:absolute;top:8px;right:8px;width:11px;height:11px;border-radius:50%;background:#22c55e;border:2px solid #fff}
+.uwb-chat-panel{position:absolute;right:0;bottom:74px;width:360px;max-width:88vw;height:500px;max-height:72vh;background:#fff;border-radius:18px;box-shadow:0 24px 60px rgba(10,42,107,.3);display:flex;flex-direction:column;overflow:hidden;border:1px solid #e9eefb}
+.uwb-chat-head{background:linear-gradient(120deg,#0a2a6b,#7c3aed);color:#fff;padding:.8rem 1rem;display:flex;align-items:center;justify-content:space-between;font-weight:700}
+.uwb-chat-head i{font-size:1.1rem}
+.uwb-chat-close{background:transparent;border:0;color:#fff;cursor:pointer;font-size:.95rem}
+.uwb-chat-body{flex:1;overflow-y:auto;padding:1rem;background:#f6f8fc;display:flex;flex-direction:column;gap:.55rem}
+.uwb-msg{max-width:82%;padding:.55rem .8rem;border-radius:14px;font-size:.9rem;line-height:1.45;white-space:pre-wrap;word-wrap:break-word}
+.uwb-msg.bot{background:#fff;border:1px solid #e9eefb;color:#101c33;align-self:flex-start;border-bottom-left-radius:4px}
+.uwb-msg.user{background:#0a2a6b;color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.uwb-msg.typing{color:#8ea0c9;font-style:italic}
+.uwb-chat-form{display:flex;gap:.4rem;padding:.6rem;border-top:1px solid #eef1f6;background:#fff}
+.uwb-chat-form input{flex:1;border:1.5px solid #dbe4ff;border-radius:50px;padding:.55rem 1rem;font-size:.9rem;outline:0}
+.uwb-chat-form input:focus{border-color:#0a2a6b}
+.uwb-chat-form button{width:44px;height:44px;border-radius:50%;border:0;background:var(--uwb-accent,#ffc107);color:#1a1a1a;font-size:1.05rem;cursor:pointer}
+.uwb-chat-form button:hover{background:#d39e00}
+@media(max-width:576px){.uwb-chat-panel{position:fixed;right:12px;left:12px;bottom:88px;width:auto;height:70vh}}

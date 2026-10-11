@@ -29,12 +29,9 @@ mysql -u root --default-character-set=utf8mb4 < uwb_learn.sql
 > Un **bouton de notifications** (cloche 🔔 + compteur) est placé **juste à côté du bouton Déconnexion** ;
 > il signale les nouveaux cours/évaluations/ressources, les copies validées et les diffusions de l'administration.
 
-Comptes démo :
-| Rôle | Email | Mot de passe |
-|---|---|---|
-| Admin | admin@uwb.ac.cd | admin123 |
-| Prof | prof@uwb.ac.cd | prof123 |
-| Étudiant | etudiant@uwb.ac.cd | etu123 |
+Aucun compte de démonstration n'est créé. Un **compte administrateur initial** est provisionné
+(`admin@uwb.ac.cd` / `admin123`) pour le premier accès ; **changez son mot de passe** aussitôt connecté.
+Les professeurs et étudiants sont ensuite créés depuis l'espace administrateur (inscription réservée aux étudiants).
 
 ## 4. Structure (nouveau = PHP, design = identique)
 ```

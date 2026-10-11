@@ -27,17 +27,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         }
-        // Re-hash si seed générique : garantit les 3 comptes démo
-        $demos = ['admin@uwb.ac.cd' => ['Admin UWB','admin','Administration','admin123'],
-                  'prof@uwb.ac.cd' => ['Prof. Mbuyi Kalonji','professeur','Informatique','prof123'],
-                  'etudiant@uwb.ac.cd' => ['Grace Lukusa','etudiant','Informatique','etu123']];
-        foreach ($demos as $email => [$nom,$role,$fil,$plain]) {
-            $c = db()->prepare('SELECT id FROM users WHERE LOWER(email)=LOWER(?)');
-            $c->execute([$email]);
-            if (!$c->fetch()) {
-                db()->prepare('INSERT INTO users (nom,email,password_hash,role,faculte) VALUES (?,?,?,?,?)')
-                  ->execute([$nom,$email,password_hash($plain, PASSWORD_DEFAULT),$role,$fil]);
-            }
+        // Compte administrateur initial (aucun compte de démonstration n'est créé)
+        $email = 'admin@uwb.ac.cd';
+        $c = db()->prepare('SELECT id FROM users WHERE LOWER(email)=LOWER(?)');
+        $c->execute([$email]);
+        if (!$c->fetch()) {
+            db()->prepare('INSERT INTO users (nom,email,password_hash,role,faculte) VALUES (?,?,?,?,?)')
+              ->execute(['Administration UWB', $email, password_hash('admin123', PASSWORD_DEFAULT), 'admin', 'Administration']);
         }
         $msg = 'Installation OK — base « ' . DB_NAME . ' » prête. Connectez-vous.';
     } catch (Throwable $t) { $msg = 'Erreur : ' . $t->getMessage(); }
@@ -50,8 +46,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="panel-pro"><h2><i class="bi bi-database"></i> Installation MySQL</h2>
 <p class="text-muted">1) Créez la base via <code>uwb_learn.sql</code>, ou cliquez ci-dessous.<br>2) Vérifiez <code>config/database.php</code> (host/user/pass).</p>
 <?php if ($msg): ?><div class="alert alert-info"><?= htmlspecialchars($msg) ?></div><?php endif; ?>
-<form method="post"><button class="btn-simple primary">Installer / Réinitialiser la démo</button>
+<form method="post"><button class="btn-simple primary">Installer / Réinitialiser la base</button>
 <a class="btn-simple" href="index.php">Accueil</a> <a class="btn-simple" href="login.php">Connexion</a></form>
 <hr><pre class="small">mysql -u root --default-character-set=utf8mb4 &lt; uwb_learn.sql</pre>
-<p class="small text-muted">Comptes démo : admin@uwb.ac.cd/admin123 • prof@uwb.ac.cd/prof123 • etudiant@uwb.ac.cd/etu123</p>
+<p class="small text-muted">Un compte administrateur initial est créé : <strong>admin@uwb.ac.cd</strong> (mot de passe <strong>admin123</strong>). Changez-le après la première connexion.</p>
 </div></div></body></html>

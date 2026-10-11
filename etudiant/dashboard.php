@@ -30,7 +30,7 @@ uwb_header_nav('espace', nav_etudiant());
 <span class="role-avatar"><i class="bi bi-mortarboard-fill"></i></span>
 <div><span class="hero-pill"><i class="bi bi-person-badge"></i> Espace étudiant</span>
 <h2>Bienvenue, <?= e($u['nom']) ?></h2>
-<p class="mb-0"><?= e($u['faculte'] ?? $u['filiere']) ?> • <?= e($u['email']) ?></p></div>
+<p class="mb-0"><?php if (!empty($u['matricule'])): ?><span class="hero-pill" style="margin:0 .3rem .2rem 0"><i class="bi bi-person-vcard"></i> <?= e($u['matricule']) ?></span><?php endif; ?><?= e($u['faculte'] ?? $u['filiere']) ?> • <?= e($u['email']) ?></p></div>
 <div class="ms-auto d-flex gap-2"><a href="cours.php" class="btn-uwb-gold text-decoration-none"><i class="bi bi-play-circle"></i> Continuer mes cours</a>
 <button class="btn-uwb text-decoration-none" style="background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.4)" data-bs-toggle="modal" data-bs-target="#profilModal"><i class="bi bi-pencil"></i> Profil</button></div>
 </div></div>
@@ -46,7 +46,7 @@ uwb_header_nav('espace', nav_etudiant());
 <div class="row g-4" data-aos="fade-up">
 <?php foreach ($meets as $i => $c) echo uwb_cours_card($c, $i); ?>
 </div>
-<div class="text-center mt-4" data-aos="fade-up"><a href="cours.php" class="btn-uwb text-decoration-none"><i class="bi bi-grid"></i> Tout le catalogue des cours</a></div>
+<div class="text-center mt-4" data-aos="fade-up"><a href="cours.php" class="btn-uwb-gold text-decoration-none"><i class="bi bi-grid"></i> Tout le catalogue des cours</a></div>
 </div></section>
 <section class="services section"><div class="container section-title" data-aos="fade-up"><h2>Mon parcours</h2><p>Évaluations, notes et lectures recommandées</p></div>
 <div class="container"><div class="row g-4">

@@ -31,20 +31,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $kind === 'role') {
 }
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $kind === 'user') {
     $nom = trim($_POST['nom'] ?? ''); $email = trim($_POST['email'] ?? '');
+    $matricule = trim($_POST['matricule'] ?? '');
     $role = $_POST['role'] ?? 'etudiant'; $pass = (string)($_POST['password'] ?? '1234');
     $fil = trim($_POST['faculte'] ?? ($_POST['filiere'] ?? '—'));
     if (!in_array($role, ['etudiant','professeur','admin'], true)) $role = 'etudiant';
     if ($nom === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) { flash('Nom/email invalides.'); header('Location: ../admin/dashboard.php'); exit; }
+    // Migration auto : colonne matricule
+    try { if (!db()->query("SHOW COLUMNS FROM users LIKE 'matricule'")->fetch()) db()->exec("ALTER TABLE users ADD COLUMN matricule VARCHAR(30) NULL, ADD UNIQUE KEY matricule (matricule)"); } catch (Throwable $t) {}
     try {
-        db()->prepare('INSERT INTO users (nom,email,password_hash,role,faculte) VALUES (?,?,?,?,?)')
-          ->execute([$nom,$email,password_hash($pass, PASSWORD_DEFAULT),$role,$fil]);
+        db()->prepare('INSERT INTO users (nom,email,password_hash,role,faculte,matricule) VALUES (?,?,?,?,?,?)')
+          ->execute([$nom,$email,password_hash($pass, PASSWORD_DEFAULT),$role,$fil,$matricule !== '' ? $matricule : null]);
         $newId = (int)db()->lastInsertId();
         flash('Compte créé.', 'success');
         // Notification : compte créé par l'administration
         require_once __DIR__ . '/../includes/notifications.php';
         $libRole = $role === 'professeur' ? 'Professeur' : ($role === 'admin' ? 'Administrateur' : 'Étudiant');
-        notifier($newId, 'Votre compte ' . $libRole . ' est créé', 'Identifiant : ' . $email . ' — faculté : ' . $fil . '. Contactez l\'administration pour votre mot de passe.', $role === 'etudiant' ? 'etudiant/dashboard.php' : ($role === 'professeur' ? 'prof/dashboard.php' : 'admin/dashboard.php'));
-    } catch (PDOException $e) { flash('Email déjà utilisé.'); }
+        notifier($newId, 'Votre compte ' . $libRole . ' est créé', 'Identifiant : ' . ($matricule !== '' ? 'Matricule ' . $matricule : $email) . ' — faculté : ' . $fil . '. Contactez l\'administration pour votre mot de passe.', $role === 'etudiant' ? 'etudiant/dashboard.php' : ($role === 'professeur' ? 'prof/dashboard.php' : 'admin/dashboard.php'));
+    } catch (PDOException $e) { flash('Email ou matricule déjà utilisé.'); }
     header('Location: ../admin/dashboard.php'); exit;
 }
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $kind === 'notif') {

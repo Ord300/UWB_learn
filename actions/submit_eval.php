@@ -4,6 +4,7 @@
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/eval_session.php';
+require_once __DIR__ . '/../includes/ia.php';
 $u = require_login(['etudiant']);
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') { header('Location: ../etudiant/evaluations.php'); exit; }
 evals_ensure_schema();
@@ -18,17 +19,30 @@ try {
         flash('Ce sujet ne concerne pas votre faculté.'); header('Location: ../etudiant/evaluations.php'); exit;
     }
 } catch (Throwable $t) {}
-// Déjà rendue ?
-$chk = db()->prepare('SELECT id FROM soumissions WHERE evaluation_id=? AND etudiant_id=? LIMIT 1');
-$chk->execute([$evalId, $u['id']]);
-if ($chk->fetch()) { flash('Copie déjà soumise pour ce sujet.'); header('Location: ../etudiant/resultats.php'); exit; }
+// Tentatives épuisées ? (aucune session en cours ne doit être acceptée au-delà du quota)
+$enCours = eval_session_get($evalId, (int)$u['id']);
+$reprise = $enCours && $enCours['etat'] === 'en_cours';
+if (!$reprise && eval_tentatives_used($evalId, (int)$u['id']) >= eval_tentatives_max($evalId)) {
+    flash('Nombre maximal de tentatives atteint pour ce sujet.');
+    header('Location: ../etudiant/evaluations.php?eval=' . $evalId); exit;
+}
 // Session obligatoire : démarée depuis la page d'évaluation
-$sess = eval_session_get($evalId, (int)$u['id']);
+$sess = $enCours;
 if (!$sess || $sess['etat'] !== 'en_cours') {
     flash('Session non démarrée : cliquez d’abord sur « Commencer l’évaluation ».');
     header('Location: ../etudiant/evaluations.php?eval=' . $evalId);
     exit;
 }
+// Garde-fou fenêtre : clôture de l'évaluation dépassée → plus de soumission
+try {
+    $w = db()->prepare('SELECT (cloture_at IS NOT NULL AND cloture_at < NOW()) AS ferme, cloture_at FROM evaluations WHERE id=?');
+    $w->execute([$evalId]); $fen = $w->fetch();
+    if ($fen && (int)$fen['ferme'] === 1) {
+        flash('Évaluation clôturée le ' . dt_fr($fen['cloture_at']) . ' : soumission impossible.');
+        header('Location: ../etudiant/evaluations.php?eval=' . $evalId); exit;
+    }
+} catch (Throwable $t) {}
+evals_finaliser_expirees((int)$u['id']);
 // Réponses
 $questions = db()->prepare('SELECT * FROM questions WHERE evaluation_id=? ORDER BY id');
 $questions->execute([$evalId]); $questions = $questions->fetchAll();

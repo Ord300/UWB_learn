@@ -17,7 +17,11 @@ if ($action === 'read' && isset($_GET['id'])) {
     $n = $s->fetch();
     if ($n) {
         try { db()->prepare('UPDATE notifications SET lu=1 WHERE id=? AND user_id=?')->execute([(int)$n['id'], (int)$u['id']]); } catch (Throwable $t) {}
-        if ($n['lien'] !== '') { header('Location: ' . $n['lien']); exit; }
+        if ($n['lien'] !== '') {
+            $lien = ltrim((string)$n['lien'], '/');
+            if (strpos($lien, 'http://') !== 0 && strpos($lien, 'https://') !== 0 && $lien[0] !== '.') $lien = '../' . $lien;
+            header('Location: ' . $lien); exit;
+        }
     }
     header('Location: ../notifications.php'); exit;
 }

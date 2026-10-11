@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport">
-<title>UWB E-learning — Université William Booth</title><link href="assets/css/style.css" rel="stylesheet">
+<title>UWB E-learning — Université William Booth</title><link href="assets/css/style.css?v=14" rel="stylesheet">
 <meta name="description" content="Étudiez à l'UWB où que vous soyez : cours en direct sur Google Meet, bibliothèque numérique intelligente et évaluations assistées par l'IA, validées par vos professeurs.">
 <link href="forms/uwbfin.webp" rel="icon">
 <link href="https://fonts.googleapis.com" rel="preconnect"><link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
@@ -16,7 +16,7 @@
 <body class="index-page">
 <header id="header" class="header d-flex align-items-center sticky-top">
 <div class="container position-relative d-flex align-items-center justify-content-between">
-<a href="index.html" class="logo d-flex align-items-center me-auto me-xl-0"><img src="forms/uwbfin.webp" alt="UWB"></a>
+<a href="index.html" class="logo logo-uwb d-flex align-items-center me-auto me-xl-0"><img src="forms/uwbfin.webp" alt="UWB"></a>
 <nav id="navmenu" class="navmenu"><ul>
 <li><a href="#hero" class="active">Accueil</a></li><li><a href="#about">Projet</a></li>
 <li><a href="#cours">Cours</a></li><li><a href="#modules">Modules</a></li>
@@ -29,8 +29,7 @@
 <div class="hero-tag"><span class="tag-dot"></span><span class="tag-text">Cours en direct • Bibliothèque intelligente • Évaluation IA</span></div>
 <h1>Étudiez à l'UWB, où que vous soyez</h1>
 <p class="lead">Cours en direct sur Google Meet, bibliothèque numérique intelligente et évaluations assistées par l'IA, validées par vos professeurs : tout votre parcours académique réuni en une seule plateforme.</p>
-<div class="hero-uwb-cta"><a href="login.php" class="btn-uwb-gold text-decoration-none"><span>Accéder à la plateforme</span> <i class="bi bi-arrow-right"></i></a><button type="button" class="btn-uwb text-decoration-none" style="background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.45)" data-bs-toggle="modal" data-bs-target="#uwbVideoModal"><i class="bi bi-play-circle"></i> Voir UWB</button></div>
-<p class="hero-uwb-demo">Démo</p>
+<div class="hero-uwb-cta"><a href="login.php" class="btn-uwb text-decoration-none"><span>Se connecter</span> <i class="bi bi-box-arrow-in-right"></i></a><button type="button" class="btn-uwb text-decoration-none" style="background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.45)" data-bs-toggle="modal" data-bs-target="#uwbVideoModal"><i class="bi bi-play-circle"></i> Voir UWB</button></div>
 </div></section>
 <div class="modal fade" id="uwbVideoModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content" style="border-radius:18px;overflow:hidden"><div class="d-flex justify-content-between align-items-center p-3"><strong><i class="bi bi-play-circle"></i> Voir UWB</strong><button type="button" class="icon-btn danger" data-bs-dismiss="modal" aria-label="Fermer"><i class="bi bi-x-lg"></i></button></div><div class="ratio ratio-16x9"><iframe src="https://www.youtube.com/embed/IWbMkyYLK9Q" title="Voir UWB" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div><div class="p-2 text-center"><a href="https://www.youtube.com/watch?v=IWbMkyYLK9Q" target="_blank" class="small">Ouvrir sur YouTube</a></div></div></div></div>
 <section id="about" class="about section"><div class="container" data-aos="fade-up" data-aos-delay="100">
@@ -42,33 +41,40 @@
 <p class="lead-text">Cours, supports, bibliothèque et évaluations réunis pour étudiants et enseignants.</p>
 <div class="ctx-feats"><div class="ctx-feat"><i class="bi bi-collection-play"></i><strong>Cours + Meet</strong><br><span class="text-muted">Séances en direct et supports centralisés.</span></div>
 <div class="ctx-feat"><i class="bi bi-book"></i><strong>Bibliothèque</strong><br><span class="text-muted">PDF, recherche et suggestions IA.</span></div>
-<div class="ctx-feat"><i class="bi bi-robot"></i><strong>Évaluation IA</strong><br><span class="text-muted">Correction proposée, prof valide.</span></div>
-<div class="ctx-feat"><i class="bi bi-people"></i><strong>3 rôles</strong><br><span class="text-muted">Admin, professeur, étudiant.</span></div></div>
+<div class="ctx-feat"><i class="bi bi-robot"></i><strong>Évaluation IA</strong><br><span class="text-muted">Correction proposée, prof valide.</span></div></div>
 <div class="d-flex gap-2 flex-wrap"><a href="login.php" class="btn-simple primary"><i class="bi bi-arrow-right"></i> Se connecter</a><a href="login.php" class="btn-simple"><i class="bi bi-grid"></i> Voir les cours</a></div>
 </div></div></div></div></section>
 
-<section id="cours" class="portfolio section"><div class="container section-title" data-aos="fade-up"><h2>Cours à l'affiche</h2><p>Extrait du catalogue — version complète après connexion</p></div>
+<section id="cours" class="portfolio section"><div class="container section-title" data-aos="fade-up"><h2>Cours à la une</h2><p>Extrait du catalogue — version complète après connexion</p></div>
 <div class="container"><div class="row g-4" id="home-cours"></div>
-<div class="text-center mt-4 d-flex gap-2 justify-content-center flex-wrap"><a href="login.php" class="btn-simple primary"><i class="bi bi-grid"></i> Tout le catalogue <i class="bi bi-arrow-right"></i></a></div></div></section>
+<div class="text-center mt-4 d-flex gap-2 justify-content-center flex-wrap"><a href="login.php" class="btn-simple gold"><i class="bi bi-grid"></i> Tout le catalogue <i class="bi bi-arrow-right"></i></a></div></div></section>
 
-<section id="modules" class="services section"><div class="container section-title" data-aos="fade-up"><h2>Les 5 modules</h2><p>Architecture fonctionnelle du système UWB</p></div>
+<section id="modules" class="services section"><div class="container section-title" data-aos="fade-up"><h2>Les 4 modules</h2><p>Architecture fonctionnelle du système UWB</p></div>
 <div class="container"><div class="svc-grid" data-aos="fade-up">
-<div class="svc-card"><div class="svc-top"><span class="svc-ic" style="background:linear-gradient(135deg,#0a2a6b,#3b82f6)"><i class="bi bi-people"></i></span><span class="svc-n">01</span></div><h3>Utilisateurs</h3><p>Admin, professeur, étudiant — accès par rôle.</p><a href="login.php" class="mod-link"><span>Se connecter</span><i class="bi bi-arrow-right"></i></a></div>
-<div class="svc-card"><div class="svc-top"><span class="svc-ic" style="background:linear-gradient(135deg,#b45309,#f2a900)"><i class="bi bi-mortarboard"></i></span><span class="svc-n">02</span></div><h3>E-learning</h3><p>Cours en ligne, Meet programmé et supports.</p><a href="login.php" class="mod-link"><span>Voir les cours</span><i class="bi bi-arrow-right"></i></a></div>
-<div class="svc-card"><div class="svc-top"><span class="svc-ic" style="background:linear-gradient(135deg,#059669,#34d399)"><i class="bi bi-book"></i></span><span class="svc-n">03</span></div><h3>Bibliothèque intelligente</h3><p>PDF, recherche et suggestions IA.</p><a href="login.php" class="mod-link"><span>Explorer</span><i class="bi bi-arrow-right"></i></a></div>
-<div class="svc-card"><div class="svc-top"><span class="svc-ic" style="background:linear-gradient(135deg,#7c3aed,#c4b5fd)"><i class="bi bi-robot"></i></span><span class="svc-n">04</span></div><h3>Évaluations + IA</h3><p>QCM auto, analyse IA, validation prof.</p><a href="login.php" class="mod-link"><span>Tester</span><i class="bi bi-arrow-right"></i></a></div>
-<div class="svc-card"><div class="svc-top"><span class="svc-ic" style="background:linear-gradient(135deg,#059669,#0a2a6b)"><i class="bi bi-camera-video"></i></span><span class="svc-n"><i class="bi bi-lightning"></i></span></div><h3>Meet en direct</h3><p>Un clic par séance, lien copiable.</p><a href="etudiant/cours.html" class="mod-link"><span>Rejoindre</span><i class="bi bi-arrow-right"></i></a></div>
+<div class="svc-card"><div class="svc-top"><span class="svc-ic" style="background:linear-gradient(135deg,#0a2a6b,#2b5cb8)"><i class="bi bi-mortarboard"></i></span><span class="svc-n">01</span></div><h3>E-learning</h3><p>Cours en ligne, Meet programmé et supports.</p><a href="login.php" class="mod-link"><span>Voir les cours</span><i class="bi bi-arrow-right"></i></a></div>
+<div class="svc-card"><div class="svc-top"><span class="svc-ic" style="background:linear-gradient(135deg,#b31219,#e31e24)"><i class="bi bi-book"></i></span><span class="svc-n">02</span></div><h3>Bibliothèque intelligente</h3><p>PDF, recherche et suggestions IA.</p><a href="login.php" class="mod-link"><span>Explorer</span><i class="bi bi-arrow-right"></i></a></div>
+<div class="svc-card"><div class="svc-top"><span class="svc-ic" style="background:linear-gradient(135deg,#d39e00,#ffc107)"><i class="bi bi-robot"></i></span><span class="svc-n">03</span></div><h3>Évaluations + IA</h3><p>QCM auto, analyse IA, validation prof.</p><a href="login.php" class="mod-link"><span>Tester</span><i class="bi bi-arrow-right"></i></a></div>
+<div class="svc-card"><div class="svc-top"><span class="svc-ic" style="background:linear-gradient(135deg,#123a8f,#3b82f6)"><i class="bi bi-camera-video"></i></span><span class="svc-n">04</span></div><h3>Meet en direct</h3><p>Un clic par séance, lien copiable.</p><a href="login.php" class="mod-link"><span>Rejoindre</span><i class="bi bi-arrow-right"></i></a></div>
 </div></div></section>
 
-<section id="acces"><div class="cta-wide" style="border-radius:0" data-aos="fade-up"><div class="cta-wide-inner" style="max-width:760px"><span class="hero-pill"><i class="bi bi-mortarboard"></i> UWB • Dignité — Honneur — Excellence</span><h2 class="mt-3 mb-2" style="line-height:1.2">Prêt à apprendre<br>avec l'UWB ?</h2><p class="mb-3 mx-auto" style="max-width:560px">Un seul compte pour vos cours en ligne, la bibliothèque intelligente et les évaluations.</p><div class="cta-steps justify-content-center mb-4"><span class="cta-step">1 • Inscription</span><span class="cta-step">2 • Connexion</span><span class="cta-step">3 • Apprentissage</span></div><div class="d-flex gap-2 flex-wrap justify-content-center"><a href="login.php" class="btn-uwb text-decoration-none" style="background:#fff;color:#0a2a6b"><i class="bi bi-box-arrow-in-right"></i> Connexion</a><a href="inscription.php" class="btn-uwb-gold text-decoration-none"><i class="bi bi-person-plus"></i> Inscription gratuite</a></div></div></div></section>
+<section id="acces"><div class="cta-wide" style="border-radius:0" data-aos="fade-up"><div class="cta-wide-inner" style="max-width:760px"><span class="hero-pill"><i class="bi bi-mortarboard"></i> UWB • Dignité — Honneur — Excellence</span><h2 class="mt-3 mb-2" style="line-height:1.2">Prêt à apprendre<br>avec l'UWB ?</h2><p class="mb-3 mx-auto" style="max-width:560px">Un seul compte pour vos cours en ligne, la bibliothèque intelligente et les évaluations.</p><div class="cta-steps justify-content-center mb-4"><span class="cta-step">1 • Inscription</span><span class="cta-step">2 • Connexion</span><span class="cta-step">3 • Apprentissage</span></div><div class="d-flex gap-2 flex-wrap justify-content-center"><a href="login.php" class="btn-uwb text-decoration-none"><i class="bi bi-box-arrow-in-right"></i> Connexion</a><a href="inscription.php" class="btn-uwb-gold text-decoration-none"><i class="bi bi-person-plus"></i> Compte étudiant</a></div></div></div></section>
 </main>
 <footer id="footer" class="footer light-background"><div class="container footer-top"><div class="row gy-4">
-<div class="col-lg-4 footer-info"><span class="sitename">UWB.Learn</span><p>Plateforme E-learning de l'Université William Booth : cours, bibliothèque intelligente, évaluations IA, Google Meet.</p></div>
-<div class="col-lg-2 footer-links"><h4>Modules</h4><ul><li><a href="etudiant/cours.html">Cours</a></li><li><a href="etudiant/bibliotheque.html">Bibliothèque</a></li><li><a href="etudiant/evaluations.html">Évaluations</a></li><li><a href="etudiant/resultats.html">Résultats</a></li></ul></div>
-<div class="col-lg-2 footer-links"><h4>Espaces</h4><ul><li><a href="login.php">Connexion</a></li><li><a href="dashboard.html">Dashboard</a></li></ul></div>
-<div class="col-lg-4"><div class="footer-newsletter"><h4>Design</h4><p>Interface basée sur le template Orbit (BootstrapMade), adaptée aux couleurs UWB.</p></div></div>
+<div class="col-lg-4 col-md-6 footer-info"><span class="sitename">UWB.Learn</span><p>Plateforme E-learning de l'Université William Booth : cours en direct, bibliothèque intelligente, évaluations assistées par l'IA.</p></div>
+<div class="col-lg-2 col-md-6 footer-links"><h4>Modules</h4><ul><li><a href="etudiant/cours.php">Cours</a></li><li><a href="etudiant/bibliotheque.php">Bibliothèque</a></li><li><a href="etudiant/evaluations.php">Évaluations</a></li><li><a href="etudiant/resultats.php">Résultats</a></li></ul></div>
+<div class="col-lg-3 col-md-6 footer-links"><h4>Université William Booth</h4><ul>
+<li><i class="bi bi-geo-alt"></i> 12 Avenue Du Kasai, Gombe, Kinshasa, RDC</li>
+<li><i class="bi bi-telephone"></i> <a href="tel:+243815431601">+243 815 431 601</a></li>
+<li><i class="bi bi-envelope"></i> <a href="mailto:infos@uwbcongo.org">infos@uwbcongo.org</a></li>
+<li><i class="bi bi-globe"></i> <a href="https://uwbcongo.org" target="_blank" rel="noopener">www.uwbcongo.org</a></li>
+</ul></div>
+<div class="col-lg-3 col-md-6 footer-links"><h4>Contacts utiles</h4><ul>
+<li><i class="bi bi-envelope-at"></i> <a href="mailto:rectorat@uwbcongo.org">rectorat@uwbcongo.org</a></li>
+<li><i class="bi bi-telephone"></i> <a href="tel:+243812502966">+243 812 502 966</a></li>
+<li><i class="bi bi-mortarboard"></i> Devise : Dignité, Honneur, Excellence</li>
+</ul></div>
 </div></div>
-<div class="container footer-bottom"><div class="copyright"><p>© UWB E-learning — Projet académique. Design : <a href="https://bootstrapmade.com/">BootstrapMade (Orbit)</a>.</p></div></div></footer>
+<div class="container footer-bottom"><div class="copyright"><p>© <?= date('Y') ?> Université William Booth — UWB.Learn. Tous droits réservés.</p></div></div></footer>
 <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a><div id="preloader"></div>
 <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="assets/vendor/aos/aos.js"></script><script src="assets/vendor/glightbox/js/glightbox.min.js"></script>

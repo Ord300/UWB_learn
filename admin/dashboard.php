@@ -3,6 +3,9 @@ require_once __DIR__ . '/../includes/layout.php';
 $u = require_login(['admin']);
 $flash = flash();
 $users = db()->query('SELECT * FROM users ORDER BY id')->fetchAll();
+$students = array_values(array_filter($users, fn($x) => ($x['role'] ?? '') === 'etudiant'));
+$profs    = array_values(array_filter($users, fn($x) => ($x['role'] ?? '') === 'professeur'));
+$admins   = array_values(array_filter($users, fn($x) => ($x['role'] ?? '') === 'admin' || ($x['role'] ?? '') === 'superadmin'));
 $facultes = db()->query('SELECT * FROM facultes ORDER BY nom')->fetchAll();
 $nbCours = (int)db()->query('SELECT COUNT(*) c FROM cours')->fetch()['c'];
 $nbLivres = (int)db()->query('SELECT COUNT(*) c FROM livres')->fetch()['c'];
@@ -18,7 +21,6 @@ uwb_header_nav('admin', nav_admin());
 <div><span class="hero-pill"><i class="bi bi-gear"></i> Espace administrateur</span>
 <h2>Bienvenue, <?= e($u['nom']) ?></h2>
 <p class="mb-0"><?= e($u['email']) ?> • Super-admin plateforme</p></div>
-<div class="ms-auto"><a class="btn-uwb-gold text-decoration-none" href="../install.php"><i class="bi bi-arrow-counterclockwise"></i> Reset démo</a></div>
 </div></div>
 <div class="stats-grid mt-4" data-aos="fade-up" data-aos-delay="150">
 <div class="stat-card stat-card-primary"><div class="stat-icon-wrap"><i class="bi bi-people"></i></div><div class="stat-info"><span class="stat-value"><?= count($users) ?></span><span class="stat-title">Utilisateurs</span></div></div>
@@ -28,21 +30,42 @@ uwb_header_nav('admin', nav_admin());
 </div>
 </div></section>
 <section class="services section" id="users"><div class="container section-title" data-aos="fade-up"><h2><i class="bi bi-people"></i> Comptes étudiants & enseignants</h2><p>Créer un compte, changer un rôle, supprimer un accès</p></div>
-<div class="container" data-aos="fade-up"><div class="d-flex justify-content-end mb-3"><button class="btn-uwb" data-bs-toggle="modal" data-bs-target="#userModal"><i class="bi bi-plus-circle"></i> Ajouter utilisateur</button></div>
-<div class="panel-pro"><div class="panel-head"><strong><i class="bi bi-people"></i> Comptes</strong><small><?= count($users) ?> compte(s)</small></div>
-<?php foreach ($users as $x): ?>
-<div class="mini-row"><div style="min-width:0;flex:1"><strong><?= e($x['nom']) ?></strong><br><small><?= e($x['email']) ?> • <?= e($x['faculte']) ?></small><br><small><?= e($x['role']) ?></small></div>
+<div class="container" data-aos="fade-up"><div class="d-flex justify-content-end mb-3 gap-2 flex-wrap">
+<button class="btn-uwb" onclick="uwbOpenUserModal('etudiant')"><i class="bi bi-mortarboard"></i> Ajouter un étudiant</button>
+<button class="btn-uwb-gold" onclick="uwbOpenUserModal('professeur')"><i class="bi bi-journals"></i> Ajouter un professeur</button>
+</div>
+<div class="panel-pro"><div class="panel-head"><strong><i class="bi bi-mortarboard"></i> Étudiants</strong><small><?= count($students) ?> compte(s)</small></div>
+<?php foreach ($students as $x): ?>
+<div class="mini-row"><div style="min-width:0;flex:1"><strong><?= e($x['nom']) ?></strong><br><small><?= e($x['email']) ?> • <?= e($x['faculte']) ?></small><br><?php if (!empty($x['matricule'])): ?><span class="mini-badge"><i class="bi bi-person-vcard"></i> <?= e($x['matricule']) ?></span><?php endif; ?></div>
 <div class="mini-actions"><form method="post" action="../actions/admin.php" class="d-flex gap-1"><input type="hidden" name="kind" value="role"><input type="hidden" name="id" value="<?= (int)$x['id'] ?>">
 <div class="select-uwb sm"><i class="bi bi-person-badge"></i><select name="role" onchange="this.form.submit()"><?php foreach (['etudiant','professeur','admin'] as $r): ?><option <?= $x['role']===$r?'selected':'' ?>><?= e($r) ?></option><?php endforeach; ?></select></div></form>
 <a class="icon-btn danger" href="../actions/admin.php?kind=user_delete&id=<?= (int)$x['id'] ?>" onclick="return confirm('Supprimer ?')"><i class="bi bi-trash"></i></a></div></div>
-<?php endforeach; ?>
-</div></div></section>
+<?php endforeach; if (!count($students)): ?><p class="text-muted small mb-0">Aucun étudiant pour le moment. Utilisez « Ajouter un étudiant ».</p><?php endif; ?>
+</div>
+<div class="panel-pro mt-3"><div class="panel-head"><strong><i class="bi bi-journals"></i> Professeurs</strong><small><?= count($profs) ?> compte(s)</small></div>
+<?php foreach ($profs as $x): ?>
+<div class="mini-row"><div style="min-width:0;flex:1"><strong><?= e($x['nom']) ?></strong><br><small><?= e($x['email']) ?> • <?= e($x['faculte']) ?></small></div>
+<div class="mini-actions"><form method="post" action="../actions/admin.php" class="d-flex gap-1"><input type="hidden" name="kind" value="role"><input type="hidden" name="id" value="<?= (int)$x['id'] ?>">
+<div class="select-uwb sm"><i class="bi bi-person-badge"></i><select name="role" onchange="this.form.submit()"><?php foreach (['etudiant','professeur','admin'] as $r): ?><option <?= $x['role']===$r?'selected':'' ?>><?= e($r) ?></option><?php endforeach; ?></select></div></form>
+<a class="icon-btn danger" href="../actions/admin.php?kind=user_delete&id=<?= (int)$x['id'] ?>" onclick="return confirm('Supprimer ?')"><i class="bi bi-trash"></i></a></div></div>
+<?php endforeach; if (!count($profs)): ?><p class="text-muted small mb-0">Aucun professeur pour le moment. Utilisez « Ajouter un professeur ».</p><?php endif; ?>
+</div>
+<div class="panel-pro mt-3"><div class="panel-head"><strong><i class="bi bi-shield-lock"></i> Administrateurs</strong><small><?= count($admins) ?> compte(s)</small></div>
+<?php foreach ($admins as $x): ?>
+<div class="mini-row"><div style="min-width:0;flex:1"><strong><?= e($x['nom']) ?></strong><br><small><?= e($x['email']) ?> • <?= e($x['faculte']) ?></small></div>
+<div class="mini-actions"><form method="post" action="../actions/admin.php" class="d-flex gap-1"><input type="hidden" name="kind" value="role"><input type="hidden" name="id" value="<?= (int)$x['id'] ?>">
+<div class="select-uwb sm"><i class="bi bi-person-badge"></i><select name="role" onchange="this.form.submit()"><?php foreach (['etudiant','professeur','admin'] as $r): ?><option <?= $x['role']===$r?'selected':'' ?>><?= e($r) ?></option><?php endforeach; ?></select></div></form>
+<a class="icon-btn danger" href="../actions/admin.php?kind=user_delete&id=<?= (int)$x['id'] ?>" onclick="return confirm('Supprimer ?')"><i class="bi bi-trash"></i></a></div></div>
+<?php endforeach; if (!count($admins)): ?><p class="text-muted small mb-0">Aucun administrateur.</p><?php endif; ?>
+</div>
+</div></section>
 <div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content" style="border-radius:18px;overflow:hidden"><div class="p-3 p-md-4">
 <div class="d-flex justify-content-between align-items-center mb-2"><strong><i class="bi bi-person-plus"></i> Créer un compte</strong><button type="button" class="icon-btn danger" data-bs-dismiss="modal"><i class="bi bi-x-lg"></i></button></div>
 <form method="post" action="../actions/admin.php" class="row g-3 form-min"><input type="hidden" name="kind" value="user">
 <div class="col-md-3"><label class="form-label">Nom *</label><input name="nom" class="form-control" required></div>
 <div class="col-md-3"><label class="form-label">Email *</label><input name="email" type="email" class="form-control" required></div>
-<div class="col-md-3"><label class="form-label">Rôle</label><select name="role" class="form-control"><option value="etudiant">Étudiant</option><option value="professeur">Professeur</option><option value="admin">Admin</option></select></div>
+<div class="col-md-3"><label class="form-label">Rôle</label><select name="role" id="roleSel" class="form-control"><option value="etudiant">Étudiant</option><option value="professeur">Professeur</option><option value="admin">Admin</option></select></div>
+<div class="col-md-4"><label class="form-label">Matricule (étudiant)</label><input name="matricule" class="form-control" placeholder="UWB-INFO-2024-0001"></div>
 <div class="col-md-3"><label class="form-label">Mot de passe *</label><input name="password" id="up" class="form-control" value="1234" required></div>
 <div class="col-12"><label class="form-label">Faculté</label><select name="faculte" class="form-control"><option value="—">— Sans faculté —</option><?php foreach ($facultes as $f): ?><option value="<?= e($f['nom']) ?>"><?= e($f['nom']) ?> (<?= e($f['code']) ?>)</option><?php endforeach; ?></select></div>
 <div class="col-12 d-flex gap-2"><button class="btn-uwb"><i class="bi bi-check"></i> Créer</button></div></form>
@@ -77,5 +100,6 @@ uwb_header_nav('admin', nav_admin());
 <div class="col-12"><label class="form-label">Description</label><input name="description" class="form-control"></div>
 <div class="col-12 d-flex gap-2"><button class="btn-uwb"><i class="bi bi-check"></i> Enregistrer</button></div></form>
 </div></div></div></div>
+<script>function uwbOpenUserModal(role){const sel=document.getElementById('roleSel');if(sel)sel.value=role;const m=document.getElementById('userModal');if(m)new bootstrap.Modal(m).show();}</script>
 </main>
 <?php uwb_footer('UWB E-learning — Administration.'); ?>

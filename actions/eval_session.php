@@ -5,7 +5,7 @@ require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/ia.php';
 require_once __DIR__ . '/../includes/eval_session.php';
 $u = require_login(['etudiant']);
-$action = (string)($_POST['action'] ?? $_GET['action'] ?? '');
+$action = (string)($_POST['action'] ?? ''); // POST uniquement (anti-CSRF / anti-'leave' par lien)
 evals_ensure_schema();
 
 function _ev_faculte_ok(array $ev, array $u): bool {
@@ -42,10 +42,19 @@ if ($action === 'start') {
         header('Location: ../etudiant/evaluations.php?eval=' . $id); exit;
     }
     $chk = db()->prepare('SELECT id FROM soumissions WHERE evaluation_id=? AND etudiant_id=?'); $chk->execute([$id, $u['id']]);
-    if ($chk->fetch()) { flash('Copie déjà soumise pour ce sujet.'); header('Location: ../etudiant/evaluations.php?eval=' . $id); exit; }
+    $enCours = eval_session_get($id, (int)$u['id']);
+    $resume = $enCours && $enCours['etat'] === 'en_cours';
+    if (!$resume && eval_tentatives_used($id, (int)$u['id']) >= eval_tentatives_max($id)) {
+        flash('Nombre maximal de tentatives atteint pour ce sujet (' . eval_tentatives_max($id) . ').');
+        header('Location: ../etudiant/evaluations.php?eval=' . $id); exit;
+    }
     $sess = eval_session_start($id, (int)$u['id'], (int)$ev['duree']);
-    if ($sess) flash('Session démarrée — début ' . eval_heure($sess['started_at']) . ', fin ' . eval_heure($sess['deadline_at']) . '.', 'success');
-    else flash('Impossible de démarrer la session.');
+    if ($sess) {
+        $reste = eval_tentatives_max($id) - eval_tentatives_used($id, (int)$u['id']);
+        flash('Session démarrée (tentative ' . (int)$sess['tentative'] . ') — début ' . eval_heure($sess['started_at']) . ', fin ' . eval_heure($sess['deadline_at']) . '.', 'success');
+    } else {
+        flash('Impossible de démarrer la session.');
+    }
     header('Location: ../etudiant/evaluations.php?eval=' . $id);
     exit;
 }
@@ -59,6 +68,24 @@ if ($action === 'save') {
     $ok = $sess && $sess['etat'] === 'en_cours' && eval_session_save($id, (int)$u['id'], $reps);
     $at = db()->query("SELECT DATE_FORMAT(NOW(), '%H:%i:%s')")->fetchColumn();
     echo json_encode(['ok' => $ok ? 1 : 0, 'at' => (string)$at, 'etat' => $sess['etat'] ?? 'absente'], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+// ---------- ÉVÉNEMENT ANTI-TRICHE (plein écran, copie, clic droit, perte de focus…) ----------
+if ($action === 'event') {
+    header('Content-Type: application/json; charset=utf-8');
+    $id = (int)($_POST['evaluation_id'] ?? 0);
+    $type = substr(preg_replace('/[^a-z_]/', '', (string)($_POST['type'] ?? 'incident')) ?: 'incident', 0, 40);
+    $det = substr((string)($_POST['details'] ?? ''), 0, 250);
+    $sess = eval_session_get($id, (int)$u['id']);
+    if (!$sess || $sess['etat'] !== 'en_cours') { echo json_encode(['ok' => 0, 'etat' => $sess['etat'] ?? 'absente']); exit; }
+    $r = eval_session_incident($id, (int)$u['id'], $type, $det);
+    if ($r['depasse']) {
+        eval_session_finaliser($sess, 'triche', _ev_reponses_post(), 'Trop d\'incidents anti-triche (' . $r['incidents'] . '/' . $r['max'] . ') : ' . ($det !== '' ? $det : $type));
+        echo json_encode(['ok' => 1, 'etat' => 'triche', 'incidents' => $r['incidents'], 'max' => $r['max']], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+    echo json_encode(['ok' => 1, 'etat' => 'en_cours', 'incidents' => $r['incidents'], 'max' => $r['max']], JSON_UNESCAPED_UNICODE);
     exit;
 }
 

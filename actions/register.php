@@ -4,6 +4,9 @@ require_once __DIR__ . '/../includes/auth.php';
 if (session_status() === PHP_SESSION_NONE) session_start();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') { header('Location: ../inscription.php'); exit; }
+// Inscription libre désactivée : les comptes étudiants sont créés par l'administration avec un matricule.
+flash('Les comptes étudiants sont créés par l\'administration. Identifiez-vous avec votre matricule.');
+header('Location: ../login.php'); exit;
 $nom = trim($_POST['nom'] ?? '');
 $email = trim($_POST['email'] ?? '');
 $pass = (string)($_POST['password'] ?? $_POST['pass'] ?? '');

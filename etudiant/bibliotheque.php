@@ -25,6 +25,8 @@ if ($isAdmin && isset($_GET['edit'])) {
 }
 $facultes = [];
 try { $facultes = db()->query('SELECT nom,code FROM facultes ORDER BY nom')->fetchAll(); } catch (Throwable $t) {}
+$cats = ['Informatique','Gestion','Méthodologie'];
+try { foreach (db()->query("SELECT DISTINCT categorie FROM livres WHERE categorie<>'' ORDER BY categorie")->fetchAll() as $r) { if (!in_array($r['categorie'], $cats, true)) $cats[] = $r['categorie']; } } catch (Throwable $t) {}
 uwb_head('Bibliothèque intelligente', 'Ressources UWB.');
 uwb_header_nav('biblio', $isAdmin ? nav_admin() : nav_etudiant());
 ?>
@@ -45,7 +47,7 @@ uwb_header_nav('biblio', $isAdmin ? nav_admin() : nav_etudiant());
 <div class="pro-row">
 <div class="pro-input"><i class="bi bi-search"></i><input name="q" value="<?= e($q) ?>" placeholder="Titre, auteur, mot-clé…"><button class="pro-clear" title="Rechercher"><i class="bi bi-search"></i></button></div>
 <div class="select-uwb pro-select"><i class="bi bi-funnel"></i><select name="cat" onchange="this.form.submit()"><option value="">Toutes catégories</option>
-<?php foreach (['Informatique','Gestion','Méthodologie'] as $c): ?><option <?= $cat===$c?'selected':'' ?>><?= e($c) ?></option><?php endforeach; ?></select></div>
+<?php foreach ($cats as $c): ?><option <?= $cat===$c?'selected':'' ?>><?= e($c) ?></option><?php endforeach; ?></select></div>
 </div>
 <div class="pro-row pro-tags"><span>Recherches fréquentes :</span>
 <a class="pro-tag text-decoration-none" href="?q=sql">sql</a><a class="pro-tag text-decoration-none" href="?q=ohada">ohada</a><a class="pro-tag text-decoration-none" href="?q=ia">intelligence artificielle</a><a class="pro-tag text-decoration-none" href="?q=réseau">réseau</a><a class="pro-tag text-decoration-none" href="?q=tfe">méthodologie TFE</a></div>
@@ -85,7 +87,7 @@ uwb_header_nav('biblio', $isAdmin ? nav_admin() : nav_etudiant());
 <input type="hidden" name="fichier_exist" value="<?= e($edit['fichier'] ?? '') ?>">
 <div class="col-md-4"><label class="form-label">Titre *</label><input name="titre" class="form-control" value="<?= e($edit['titre'] ?? '') ?>" required></div>
 <div class="col-md-3"><label class="form-label">Auteur *</label><input name="auteur" class="form-control" value="<?= e($edit['auteur'] ?? '') ?>" required></div>
-<div class="col-md-2"><label class="form-label">Catégorie</label><select name="categorie" class="form-control"><?php foreach (['Informatique','Gestion','Méthodologie'] as $c): ?><option <?= ($edit['categorie'] ?? '')===$c?'selected':'' ?>><?= e($c) ?></option><?php endforeach; ?></select></div>
+<div class="col-md-2"><label class="form-label">Catégorie</label><select name="categorie" class="form-control"><?php foreach ($cats as $c): ?><option <?= ($edit['categorie'] ?? '')===$c?'selected':'' ?>><?= e($c) ?></option><?php endforeach; ?></select></div>
 <div class="col-md-2"><label class="form-label">Faculté</label><select name="faculte" class="form-control"><option value="—">— Toutes —</option><?php foreach ($facultes as $f): ?><option value="<?= e($f['nom']) ?>" <?= ($edit['faculte'] ?? '')===$f['nom']?'selected':'' ?>><?= e($f['nom']) ?></option><?php endforeach; ?></select></div>
 <div class="col-md-3"><label class="form-label">Année</label><input name="annee" type="number" min="1990" max="2030" value="<?= (int)($edit['annee'] ?? 2026) ?>" class="form-control"></div>
 <div class="col-md-4"><label class="form-label">Image (URL)</label><input name="cover_url" class="form-control" value="<?= e((!str_starts_with($edit['cover'] ?? '', 'uploads/') && !str_starts_with($edit['cover'] ?? '', 'data:')) ? ($edit['cover'] ?? '') : '') ?>" placeholder="https://…"></div>

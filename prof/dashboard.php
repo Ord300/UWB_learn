@@ -2,14 +2,20 @@
 require_once __DIR__ . '/../includes/layout.php';
 $u = require_login(['professeur','admin']);
 $flash = flash();
+$fac = $u['role'] === 'admin' ? '' : my_faculte();
 if ($u['role'] === 'admin') { $allCours = db()->query('SELECT * FROM cours')->fetchAll(); $mesEvals = db()->query('SELECT * FROM evaluations')->fetchAll(); }
 else {
-    $s = db()->prepare('SELECT * FROM cours WHERE enseignant_nom=?'); $s->execute([$u['nom']]); $allCours = $s->fetchAll();
-    $s = db()->prepare('SELECT * FROM evaluations WHERE prof_nom=?'); $s->execute([$u['nom']]); $mesEvals = $s->fetchAll();
+    $sql = 'SELECT * FROM cours WHERE enseignant_nom=?'; $p = [$u['nom']];
+    if ($fac !== '') { $sql .= " AND (faculte=? OR faculte IN ('—',''))"; $p[] = $fac; }
+    $s = db()->prepare($sql); $s->execute($p); $allCours = $s->fetchAll();
+    $sql = 'SELECT * FROM evaluations WHERE prof_nom=?'; $p = [$u['nom']];
+    if ($fac !== '') { $sql .= " AND (faculte=? OR faculte IN ('—',''))"; $p[] = $fac; }
+    $s = db()->prepare($sql); $s->execute($p); $mesEvals = $s->fetchAll();
 }
 if ($u['role'] === 'admin') $att = db()->query("SELECT COUNT(*) c FROM soumissions WHERE statut='proposee-IA'")->fetch()['c'];
-else { $s = db()->prepare("SELECT COUNT(*) c FROM soumissions s JOIN evaluations e ON e.id=s.evaluation_id WHERE s.statut='proposee-IA' AND e.prof_nom=?"); $s->execute([$u['nom']]); $att = $s->fetch()['c']; }
-$nbEtu = (int)db()->query("SELECT COUNT(*) c FROM users WHERE role='etudiant'")->fetch()['c'];
+else { $sql = "SELECT COUNT(*) c FROM soumissions s JOIN evaluations e ON e.id=s.evaluation_id WHERE s.statut='proposee-IA' AND e.prof_nom=?"; $p = [$u['nom']]; if ($fac !== '') { $sql .= " AND (e.faculte=? OR e.faculte IN ('—',''))"; $p[] = $fac; } $s = db()->prepare($sql); $s->execute($p); $att = $s->fetch()['c']; }
+if ($fac !== '') { $s = db()->prepare("SELECT COUNT(*) c FROM users WHERE role='etudiant' AND (faculte=? OR faculte IN ('—',''))"); $s->execute([$fac]); $nbEtu = (int)$s->fetch()['c']; }
+else $nbEtu = (int)db()->query("SELECT COUNT(*) c FROM users WHERE role='etudiant'")->fetch()['c'];
 uwb_head('Espace professeur', 'Espace prof UWB.');
 uwb_header_nav('espace', nav_prof());
 ?>

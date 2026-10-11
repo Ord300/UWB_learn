@@ -219,15 +219,9 @@ function uwbPath(p){ return uwbBase()+p; }
 })();
 
 /* ===== uwb-data.js ===== */
-/* UWB — Base de données de démonstration (localStorage) */
+/* UWB — Base de données locale (pages vitrine .php : affichage d'exemples) */
 const UWB_SEED = {
-  users: [
-    {id:'u-admin', nom:'Admin UWB', email:'admin@uwb.ac.cd', pass:'admin123', role:'admin', filiere:'Administration'},
-    {id:'u-prof1', nom:'Prof. Mbuyi Kalonji', email:'prof@uwb.ac.cd', pass:'prof123', role:'professeur', filiere:'Informatique'},
-    {id:'u-prof2', nom:'Prof. Aline Nsimba', email:'aline@uwb.ac.cd', pass:'prof123', role:'professeur', filiere:'Gestion'},
-    {id:'u-etu1', nom:'Grace Lukusa', email:'etudiant@uwb.ac.cd', pass:'etu123', role:'etudiant', filiere:'L3 Informatique'},
-    {id:'u-etu2', nom:'Jean Ilunga', email:'jean@uwb.ac.cd', pass:'etu123', role:'etudiant', filiere:'L2 Gestion'}
-  ],
+  users: [],
   cours: [
     {id:'c1', titre:'Programmation Web : HTML, CSS & JavaScript', enseignant:'Prof. Mbuyi Kalonji', categorie:'Informatique', niveau:'L3', description:"Création d'interfaces modernes, Bootstrap 5, DOM, fetch API et bonnes pratiques.", supports:['Support PDF - HTML5.pdf','TP N°3 - Portfolio Bootstrap.zip'], seance:{date:'2026-10-07 10:00', meet:'https://meet.google.com/uwb-web-101', salle:'Visioconférence Google Meet'}, inscrits:42, image:'forms/portfolio-8.webp'},
     {id:'c2', titre:'Bases de données & SQL', enseignant:'Prof. Mbuyi Kalonji', categorie:'Informatique', niveau:'L2', description:'Modèle relationnel, MCD/MLD, requêtes SQL, vues et transactions.', supports:['MCD - Gestion UWB.pdf','TD SQL corrigé.pdf'], seance:{date:'2026-10-08 14:00', meet:'https://meet.google.com/uwb-sql-202', salle:'Visioconférence Google Meet'}, inscrits:38, image:'forms/portfolio-2.webp'},
@@ -325,8 +319,7 @@ function uwbSidebar(active){
   if(s.role==='admin') links.push([uwbBase()+'admin/dashboard.html#users','bi-people','Utilisateurs','admin']);
   let h=`<div class="mb-3">${uwbUserBadge(s)}</div>`;
   links.forEach(([href,ic,label])=>{ const key=href.split('#')[0]; const akey=(active||'').split('#')[0]; h+=`<a href="${href}" class="${akey===key? 'active':''}"><i class="bi ${ic}"></i> ${label}</a>`; });
-  h+=`<a href="${uwbBase()}index.html"><i class="bi bi-house"></i> Site vitrine</a><a href="#" onclick="uwbLogout();return false;"><i class="bi bi-box-arrow-right"></i> Déconnexion</a>
-  <div class="mt-auto p-2 small" style="background:rgba(255,255,255,.12);border-radius:12px">Comptes démo :<br>admin@uwb.ac.cd / admin123<br>prof@uwb.ac.cd / prof123<br>etudiant@uwb.ac.cd / etu123</div>`;
+  h+=`<a href="${uwbBase()}index.php"><i class="bi bi-house"></i> Site vitrine</a><a href="#" onclick="uwbLogout();return false;"><i class="bi bi-box-arrow-right"></i> Déconnexion</a>`;
   return h;
 }
 function uwbToast(msg){ alert(msg); }
@@ -353,7 +346,10 @@ function uwbMeetState(ds){const m=/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/.exe
 function uwbCopyLink(link,btn){const done=()=>{btn.innerHTML='<i class="bi bi-check-lg"></i>';setTimeout(()=>btn.innerHTML='<i class="bi bi-link-45deg"></i>',1500);};if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(link).then(done).catch(()=>prompt('Copiez le lien :',link));}else{prompt('Copiez le lien :',link);}}
 function uwbCoursCard(x,i){const ms=uwbMeetState(x.seance.date);const d=((i||0)%3)*100;
 const sup=(x.supports||[]);
-return `<div class="col-lg-4 col-md-6 portfolio-item" data-aos="fade-up" data-aos-delay="${d}"><div class="course-min h-100" data-cat="${x.categorie}"><div class="cat-strip"></div><div class="course-min-body"><div class="d-flex gap-1 align-items-center flex-wrap mb-2"><span class="mini-badge">${x.categorie}</span><span class="mini-badge ghost">${x.niveau}</span><span class="ms-auto mini-muted"><i class="bi bi-people"></i> ${x.inscrits} inscrits</span></div><h3>${x.titre}</h3><div class="teacher-mini"><span class="avatar-initials xs">${uwbInitials(x.enseignant)}</span><span>${x.enseignant}</span></div><p class="course-desc">${x.description}</p><div class="supports-mini"><i class="bi bi-paperclip"></i> ${sup.length} support(s)${sup.length?(' — '+sup.slice(0,2).join(' • ')+(sup.length>2?' …':'')):''}</div><div class="meet-strip ${ms&&ms.past?'past':''}"><span class="dot"></span><div class="flex-fill" style="min-width:0"><small class="text-muted">${ms?(ms.past?'Séance terminée':'Prochaine séance'):'Séance à programmer'}</small><br><strong class="small">${ms?(ms.jour+' '+ms.mois+' • '+ms.heure):x.seance.date}</strong></div><a href="${x.seance.meet}" target="_blank" class="btn-join" title="Rejoindre sur Google Meet"><i class="bi bi-camera-video-fill"></i> Rejoindre</a><button class="btn-copy" title="Copier le lien" onclick="uwbCopyLink('${x.seance.meet}',this)"><i class="bi bi-link-45deg"></i></button></div></div></div></div>`;}
+const etat=!ms?'aucune':(ms.live?'live':(ms.past?'fini':'avant'));
+const libEtat={avant:'Séance à venir',live:'En direct',fini:'Séance terminée',aucune:'Séance à programmer'}[etat];
+const canJoin=false; // accueil : page vitrine, aucun lien Meet fonctionnel
+return `<div class="col-lg-4 col-md-6 portfolio-item" data-aos="fade-up" data-aos-delay="${d}"><div class="course-min h-100" data-cat="${x.categorie}"><div class="cat-strip"></div><div class="course-min-body"><div class="d-flex gap-1 align-items-center flex-wrap mb-2"><span class="mini-badge">${x.categorie}</span><span class="mini-badge ghost">${x.niveau}</span><span class="ms-auto mini-muted"><i class="bi bi-people"></i> ${x.inscrits} inscrits</span></div><h3>${x.titre}</h3><div class="teacher-mini"><span class="avatar-initials xs">${uwbInitials(x.enseignant)}</span><span>${x.enseignant}</span></div><p class="course-desc">${x.description}</p><div class="supports-mini"><i class="bi bi-paperclip"></i> ${sup.length} support(s)${sup.length?(' — '+sup.slice(0,2).join(' • ')+(sup.length>2?' …':'')):''}</div><div class="meet-strip ${etat==='fini'?'past':''}"><span class="dot"></span><div class="flex-fill" style="min-width:0"><small class="text-muted">${libEtat}</small><br><strong class="small">${ms?(ms.jour+' '+ms.mois+' • '+ms.heure):x.seance.date}</strong></div>${canJoin?`<a href="${x.seance.meet}" target="_blank" class="btn-join" title="Rejoindre sur Google Meet"><i class="bi bi-camera-video-fill"></i> Rejoindre</a><button class="btn-copy" title="Copier le lien" onclick="uwbCopyLink('${x.seance.meet}',this)"><i class="bi bi-link-45deg"></i></button>`:`<span class="btn-join" style="opacity:.55;cursor:not-allowed" title="Connectez-vous pour accéder aux séances"><i class="bi bi-lock"></i> Se connecter</span>`}</div></div></div></div>`;}
 
 /* ===== uwb-ia.js ===== */
 /* UWB — Moteur IA simulée : correction QCM + analyse mots-clés + feedback */

@@ -47,8 +47,41 @@ function ia_groq_chat(string $system, string $user): ?string {
     } catch (Throwable $t) { return null; }
 }
 
-/** Corrige via l'API réelle. Retourne null si clé absente / erreur / réponse invalide → repli local. */
-function ia_corriger_api(array $questions, array $reponses): ?array {
+/**
+ * Assistant conversationnel UWB.Learn (chatbot) via l'API Groq (texte libre).
+ * Retourne le contenu de la réponse ou null (clé absente / erreur réseau).
+ */
+function ia_groq_reply(array $messages, float $temperature = 0.4): ?string {
+    if (!ia_api_configuee() || !function_exists('curl_init')) return null;
+    $body = json_encode([
+        'model' => defined('IA_MODEL') ? IA_MODEL : 'llama-3.3-70b-versatile',
+        'temperature' => $temperature,
+        'max_tokens' => 800,
+        'messages' => $messages,
+    ], JSON_UNESCAPED_UNICODE);
+    $ch = curl_init(defined('IA_API_URL') ? IA_API_URL : '');
+    curl_setopt_array($ch, [
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => $body,
+        CURLOPT_HTTPHEADER => [
+            'Authorization: Bearer ' . IA_API_KEY,
+            'Content-Type: application/json',
+        ],
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT => defined('IA_TIMEOUT') ? (int)IA_TIMEOUT : 45,
+        CURLOPT_CONNECTTIMEOUT => 10,
+    ]);
+    $out = curl_exec($ch);
+    $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    if ($out === false || $code < 200 || $code >= 300) return null;
+    try {
+        $j = json_decode((string)$out, true);
+        return $j['choices'][0]['message']['content'] ?? null;
+    } catch (Throwable $t) { return null; }
+}
+
+/** Corrige via l'API réelle. Retourne null si clé absente / erreur / réponse invalide → repli local. */function ia_corriger_api(array $questions, array $reponses): ?array {
     $qs = [];
     foreach ($questions as $q) {
         $choix = $q['choix'] ?? [];
@@ -157,14 +190,22 @@ function ia_corriger_auto(array $questions, array $reponses): array {
 
 function ia_normaliser(?string $s): string {
     $s = mb_strtolower((string)$s, 'UTF-8');
-    // transliterator si dispo, sinon iconv
     if (function_exists('transliterator_transliterate')) {
-        $s = transliterator_transliterate('Any-Latin; Latin-ASCII; Lower()', $s);
-    } else {
-        $t = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $s);
-        if ($t !== false) $s = strtolower($t);
+        $t = transliterator_transliterate('Any-Latin; Latin-ASCII; Lower()', $s);
+        if ($t !== false && $t !== null) return mb_strtolower($t, 'UTF-8');
     }
-    return $s;
+    // Repli sans intl : suppression propre des accents (iconv TRANSLIT est corrompu sous Windows)
+    $s = strtr($s, [
+        'à'=>'a','á'=>'a','â'=>'a','ã'=>'a','ä'=>'a','å'=>'a',
+        'è'=>'e','é'=>'e','ê'=>'e','ë'=>'e',
+        'ì'=>'i','í'=>'i','î'=>'i','ï'=>'i',
+        'ò'=>'o','ó'=>'o','ô'=>'o','õ'=>'o','ö'=>'o','ø'=>'o',
+        'ù'=>'u','ú'=>'u','û'=>'u','ü'=>'u','ý'=>'y',
+        'ç'=>'c','ñ'=>'n','œ'=>'oe','æ'=>'ae','ß'=>'ss','ÿ'=>'y',
+    ]);
+    $t = @iconv('UTF-8', 'ASCII//IGNORE', $s);
+    if ($t !== false) $s = $t;
+    return preg_replace('/[^a-z0-9\s]/', ' ', $s) ?? $s;
 }
 
 // $questions : [['qkey','type','enonce','choix'(array),'bonne','mots_cles'(csv ou array),'points']]
@@ -308,13 +349,19 @@ function dt_fr(?string $dt): string {
 function fenetre_seance(array $c): array {
     $now = date('Y-m-d H:i:s');
     if (function_exists('db')) { try { $now = (string)db()->query('SELECT NOW()')->fetchColumn(); } catch (Throwable $t) {} }
+    $cloture = !empty($c['seance_cloturee']);
     $ds = (string)($c['seance_date'] ?? '');
-    if (!preg_match('/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2})/', $ds, $m)) return ['etat' => 'aucune', 'heure_debut' => '', 'heure_fin' => ''];
+    if (!preg_match('/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2})/', $ds, $m)) {
+        return $cloture
+            ? ['etat' => 'fini', 'heure_debut' => '', 'heure_fin' => '']
+            : ['etat' => 'aucune', 'heure_debut' => '', 'heure_fin' => ''];
+    }
     $debut = $m[1] . ' ' . $m[2];
     $fin = '';
     $sf = trim((string)($c['seance_fin'] ?? ''));
     if (preg_match('/^\d{2}:\d{2}$/', $sf) && $sf > $m[2]) $fin = $m[1] . ' ' . $sf;
-    if ($now < $debut) $etat = 'avant';
+    if ($cloture) $etat = 'fini'; // le professeur a mis fin à la séance
+    elseif ($now < $debut) $etat = 'avant';
     elseif ($fin !== '' && $now > $fin) $etat = 'fini';
     elseif ($fin === '' && (strtotime($now) - strtotime($debut)) > 3600) $etat = 'fini'; // sans fin : 1 h après le début
     else $etat = 'live';

@@ -32,11 +32,29 @@ function home_by_role(string $role): string {
     if ($role === 'professeur') return $b . 'prof/dashboard.php';
     return $b . 'etudiant/dashboard.php';
 }
+/** Normalise une faculté : '' / '—' => pas de restriction. */
+function fac_key(?string $f): string {
+    $f = trim((string)$f);
+    return ($f === '' || $f === '—' || $f === '---') ? '' : $f;
+}
+/** Normalise un lien externe : ajoute https:// si le schéma manque (meet.google.com/... -> https://meet.google.com/...). */
+function uwb_link(?string $url): string {
+    $url = trim((string)$url);
+    if ($url === '') return '';
+    if (preg_match('#^(https?:|mailto:|tel:)#i', $url)) return $url;
+    return 'https://' . ltrim($url, '/');
+}
+/** Faculté de l'utilisateur connecté ('' = toutes). */
+function my_faculte(): string {
+    $u = current_user();
+    return fac_key($u['faculte'] ?? $u['filiere'] ?? '');
+}
 function login_user(array $row): void {
     $_SESSION['user'] = [
         'id' => (int)$row['id'],
         'nom' => $row['nom'],
         'email' => $row['email'],
+        'matricule' => $row['matricule'] ?? '',
         'role' => $row['role'],
         'filiere' => $row['faculte'] ?? $row['filiere'] ?? '—',
         'faculte' => $row['faculte'] ?? $row['filiere'] ?? '—',

@@ -12,12 +12,11 @@ function env_first(array $names, string $default = ''): string {
     return $default;
 }
 
-define('DB_HOST',    env_first(['MYSQLHOST', 'DB_HOST'], 'shuttle.proxy.rlwy.net'));
-define('DB_PORT',    env_first(['MYSQLPORT', 'DB_PORT'], '29695'));
-define('DB_NAME',    env_first(['MYSQLDATABASE', 'DB_NAME'], 'railway'));
-define('DB_USER',    env_first(['MYSQLUSER', 'DB_USER'], 'root'));
-define('DB_PASS',    env_first(['MYSQLPASSWORD', 'DB_PASS'], 'ZuqqSZuOIvZRWPYQxJZNktSjwgwwvDld'));
-define('DB_CHARSET', 'utf8mb4');
+define('DB_HOST', env_first(['MYSQLHOST', 'DB_HOST'], '127.0.0.1'));
+define('DB_PORT', env_first(['MYSQLPORT', 'DB_PORT'], '3306'));
+define('DB_NAME', env_first(['MYSQLDATABASE', 'DB_NAME'], 'uwb_learn'));
+define('DB_USER', env_first(['MYSQLUSER', 'DB_USER'], 'root'));
+define('DB_PASS', env_first(['MYSQLPASSWORD', 'DB_PASS'], ''));
 
 function db(): PDO {
     static $pdo = null;
@@ -38,10 +37,7 @@ function db(): PDO {
         // Détail technique dans les logs Railway, pas à l'écran
         error_log('DB error: ' . $e->getMessage() . ' | host=' . DB_HOST . ' port=' . DB_PORT);
         http_response_code(500);
-        die('<div style="font-family:sans-serif;max-width:680px;margin:40px auto;padding:24px;border:1px solid #eee;border-radius:16px">'
-            . '<h2>Base de données inaccessible</h2>'
-            . '<p>Le service est momentanément indisponible. Réessayez dans quelques instants.</p>'
-            . '</div>');
+        die('Erreur : ' . htmlspecialchars($e->getMessage()) . ' | host=' . DB_HOST . ' port=' . DB_PORT . ' db=' . DB_NAME . ' user=' . DB_USER);
     }
 }
 

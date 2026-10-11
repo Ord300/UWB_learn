@@ -277,7 +277,7 @@ CREATE TABLE `soumissions` (
   `details` text DEFAULT NULL COMMENT 'JSON details IA',
   `statut` enum('proposee-IA','validee','triche') NOT NULL DEFAULT 'proposee-IA',
   `commentaire_prof` varchar(500) DEFAULT '',
-  `date_soumission` date DEFAULT curdate(),
+  `date_soumission` date DEFAULT NULL COMMENT 'Renseigner à l''insert (ex. CURDATE() côté app)',
   `created_at` timestamp NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
   KEY `etudiant_id` (`etudiant_id`),

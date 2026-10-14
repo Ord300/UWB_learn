@@ -3,7 +3,7 @@
 Plateforme E-learning UWB : cours + Google Meet, bibliothèque intelligente, évaluations + IA, 3 rôles.
 Conversion fidèle de la version statique (`localStorage`) vers **PHP 8 + MySQL + sessions**, **sans modifier le design** (`assets/css/style.css`, images, classes et structure HTML identiques).
 
-## 1. Prérequis
+## 1. Prérequi
 - PHP 8.1+, MySQL 8 (XAMPP / WAMP / Laragon / Ubuntu), Apache
 - Extensions PHP : `pdo_mysql`, `mbstring`, `intl` (recommandé pour l'IA)
 

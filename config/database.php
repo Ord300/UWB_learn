@@ -5,16 +5,18 @@
 // ============================================================
 
 // Modifiez ces 4 valeurs selon votre environnement (XAMPP/WAMP/Laragon/Ubuntu)
-define('DB_HOST', getenv('DB_HOST') ?: '127.0.0.1');
-define('DB_NAME', getenv('DB_NAME') ?: 'uwb_learn');
-define('DB_USER', getenv('DB_USER') ?: 'root');
-define('DB_PASS', getenv('DB_PASS') ?: '');
+// Sur Railway, les variables MYSQL* sont injectées automatiquement et utilisées en priorité.
+define('DB_HOST', getenv('DB_HOST') ?: getenv('MYSQLHOST') ?: getenv('MYSQL_HOST') ?: '127.0.0.1');
+define('DB_PORT', getenv('DB_PORT') ?: getenv('MYSQLPORT') ?: '3306');
+define('DB_NAME', getenv('DB_NAME') ?: getenv('MYSQLDATABASE') ?: getenv('MYSQL_DATABASE') ?: 'uwb_learn');
+define('DB_USER', getenv('DB_USER') ?: getenv('MYSQLUSER') ?: getenv('MYSQL_USER') ?: 'root');
+define('DB_PASS', getenv('DB_PASS') !== false && getenv('DB_PASS') !== '' ? getenv('DB_PASS') : (getenv('DB_PASSWORD') ?: getenv('MYSQLPASSWORD') ?: getenv('MYSQL_ROOT_PASSWORD') ?: ''));
 define('DB_CHARSET', 'utf8mb4');
 
 function db(): PDO {
     static $pdo = null;
     if ($pdo instanceof PDO) return $pdo;
-    $dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=' . DB_CHARSET;
+    $dsn = 'mysql:host=' . DB_HOST . ';port=' . DB_PORT . ';dbname=' . DB_NAME . ';charset=' . DB_CHARSET;
     $opt = [
         PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
